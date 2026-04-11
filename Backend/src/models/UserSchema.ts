@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
-
 export type FitnessLevel = "beginner" | "intermediate" | "advanced";
 
 export interface IUser extends Document {
@@ -11,6 +10,7 @@ export interface IUser extends Document {
   heightCm?: number;
   weightKg?: number;
   level?: FitnessLevel;
+  medicalIssues?: string[]; 
   memberSince: Date;
   streak: number;
   totalTasksDone: number;
@@ -31,6 +31,8 @@ const UserSchema = new Schema<IUser>(
       enum: ["beginner", "intermediate", "advanced"],
       default: "beginner"
     },
+    // Added: Defines an array of strings, trimming whitespace from each entry
+    medicalIssues: [{ type: String, trim: true }], 
     memberSince: { type: Date, default: Date.now },
     streak: { type: Number, default: 0 },
     totalTasksDone: { type: Number, default: 0 },
@@ -41,4 +43,3 @@ const UserSchema = new Schema<IUser>(
 );
 
 export const User = mongoose.model<IUser>("User", UserSchema);
-
