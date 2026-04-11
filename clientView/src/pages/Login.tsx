@@ -8,9 +8,7 @@ import { Label } from "@/components/ui/label";
 import axios from "axios";
 import { useEffect } from "react";
 
-// useEffect(() => {
-//   console.log("tmkc");
-// }, []);
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,8 +29,7 @@ const Login = () => {
         password
       });
 
-      // Store the token (you might want to use a more secure method in production)
-      localStorage.setItem('token', response.data.token);
+      document.cookie = `token=${response.data.token}; max-age=86400; path=/; SameSite=Strict; Secure`;
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
       navigate("/dashboard");
