@@ -1,0 +1,16 @@
+fitness-agent-backend/
+├── .env                  # Your API keys (OpenAI, MongoDB, Weather)
+├── package.json
+├── tsconfig.json
+└── src/
+    ├── index.ts          # Entry point (Starts Express server)
+    ├── database.ts       # MongoDB connection logic
+    ├── models/           # Mongoose schemas (User, MealLog, WorkoutLog)
+    ├── tools/            # Weather API, Calendar API, Grocery mock API
+    ├── agents/           # Logic for individual agents
+    │   ├── mealAgent.ts
+    │   ├── exerciseAgent.ts
+    │   ├── ragAgent.ts
+    │   └── orchestrator.ts # The LangGraph supervisor
+    └── routes/
+        └── chatRoutes.ts # The API endpoints for React to hit
