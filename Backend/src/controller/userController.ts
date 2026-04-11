@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { User } from "../models/UserSchema.js"; // Adjust path to your model
+import { User } from "../models/UserSchema.js"; 
 
 export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -25,6 +25,7 @@ export const loginUser = async (req: Request, res: Response) => {
       process.env.JWT_SECRET || "fallback_secret", 
       { expiresIn: "1d" }
     );
+
 
     // 4. Send response
     res.status(200).json({
@@ -74,7 +75,6 @@ export const signupUser = async (req: Request, res: Response) => {
       process.env.JWT_SECRET || "fallback_secret",
       { expiresIn: "1d" }
     );
-
     // 6. Send response
     res.status(201).json({
       token,
@@ -87,5 +87,63 @@ export const signupUser = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
+  }
+};
+
+
+export const updateProfile = async (req: Request, res: Response) => {
+  try {
+    
+    const userId = (req as any).user.id; 
+    
+   
+    const { age, heightCm, weightKg, level, medicalIssues } = req.body;
+
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          age,
+          heightCm,
+          weightKg,
+          level,
+          medicalIssues 
+        }
+      },
+      { new: true, runValidators: true } 
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ 
+      message: "Profile updated successfully", 
+      user: updatedUser 
+    });
+
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+export const getUserProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id;
+    
+   
+    const user = await User.findById(userId).select("-passwordHash"); 
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
