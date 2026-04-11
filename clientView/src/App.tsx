@@ -11,7 +11,7 @@ import GoalDetail from "./pages/GoalDetail";
 import BuyItems from "./pages/BuyItems";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-
+import Onboarding from "./pages/OnBoarding";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -30,6 +30,7 @@ const App = () => (
           <Route path="/buy-items" element={<BuyItems />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/onboarding" element={<Onboarding />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

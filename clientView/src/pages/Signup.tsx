@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from "axios";
+import {getCookie} from "../utils.ts";``
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -16,7 +17,7 @@ const Signup = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSignup = async (e: React.FormEvent) => {
+const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
@@ -29,18 +30,19 @@ const Signup = () => {
         password
       });
 
-      // Store the token (you might want to use a more secure method in production)
-      localStorage.setItem('token', response.data.token);
+
+      document.cookie = `token=${response.data.token}; max-age=86400; path=/; SameSite=Strict; Secure`;
+
+
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
-      navigate("/dashboard");
+      navigate("/onboarding");
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Signup failed");
     } finally {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <motion.div
