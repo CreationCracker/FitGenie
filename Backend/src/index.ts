@@ -1,33 +1,48 @@
+//Imports 
+
+
 import express, { Request, Response, NextFunction } from 'express';
 import 'dotenv/config';
 import { connectDB } from './database.js';
+import userRoutes from './routes/userRoutes.js';
+import cors from "cors";
 
 
+
+//definitions
 const PORT = process.env.PORT || 3000;
+
+
+
+
+//setup
+
 
 const app = express();
 
 
-app.use(express.json());
-connectDB()
-
-app.get('/', (req: Request, res: Response) => {
-  res.json({
-    message: "Server is running smoothly!",
-    status: "success"
-  });
-});
 
 
-app.get('/health', (_req: Request, res: Response) => {
-  res.status(200).send('OK');
-});
+//middlewares
 
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
+app.use(express.json());
+connectDB()
+app.use(cors());
+
+
+
+//routes
+
+
+app.use('/', userRoutes);
+
+
+//server listening
 
 
 const start = async () => {
