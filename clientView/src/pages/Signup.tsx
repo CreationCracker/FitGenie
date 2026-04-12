@@ -17,9 +17,10 @@ const Signup = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const API_BASE_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // Helper to handle successful auth
+  // Handle successful authentication
   const handleAuthSuccess = (token: string, user: any) => {
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
@@ -29,15 +30,24 @@ const Signup = () => {
   // ================= NORMAL SIGNUP =================
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
 
+    if (!name || !email || !password) {
+      return setError("All fields are required.");
+    }
+
+    if (password.length < 6) {
+      return setError("Password must be at least 6 characters long.");
+    }
+
+    setIsLoading(true);
+
     try {
-      const response = await axios.post(`${API_BASE_URL}/signup`, {
-        name,
-        email,
-        password,
-      }, { withCredentials: true }); // Ensures the browser accepts the HttpOnly cookie
+      const response = await axios.post(
+        `${API_BASE_URL}/signup`,
+        { name, email, password },
+        { withCredentials: true }
+      );
 
       handleAuthSuccess(response.data.token, response.data.user);
     } catch (err: any) {
@@ -53,9 +63,13 @@ const Signup = () => {
     setError("");
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/auth/google`, {
-        token: credentialResponse.credential,
-      }, { withCredentials: true });
+      const res = await axios.post(
+        `${API_BASE_URL}/auth/google/signup`, // Dedicated signup route
+        {
+          token: credentialResponse.credential,
+        },
+        { withCredentials: true }
+      );
 
       handleAuthSuccess(res.data.token, res.data.user);
     } catch (err: any) {
@@ -66,30 +80,35 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/40 to-background px-4">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.6 }}
         className="w-full max-w-md"
       >
         {/* HEADER */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary mb-4">
-            <Dumbbell className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <h1 className="text-3xl font-bold font-display text-foreground">
-            Create account
+          <motion.div
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-r from-primary to-purple-600 mb-4 shadow-lg"
+          >
+            <Dumbbell className="w-8 h-8 text-white" />
+          </motion.div>
+
+          <h1 className="text-3xl font-bold font-display">
+            Create Account
           </h1>
           <p className="text-muted-foreground mt-2">
             Start your fitness transformation today
           </p>
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-8">
-          {/* ERROR */}
+        {/* CARD */}
+        <div className="bg-card/80 backdrop-blur-lg border border-border rounded-2xl p-8 shadow-xl">
+          {/* ERROR MESSAGE */}
           {error && (
-            <div className="p-3 mb-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+            <div className="p-3 mb-4 bg-red-100 border border-red-300 rounded-lg text-red-600 text-sm">
               {error}
             </div>
           )}
@@ -112,7 +131,7 @@ const Signup = () => {
 
             {/* EMAIL */}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
                 type="email"
@@ -140,7 +159,7 @@ const Signup = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -149,12 +168,15 @@ const Signup = () => {
                   )}
                 </button>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Must be at least 6 characters.
+              </p>
             </div>
 
-            {/* SUBMIT */}
+            {/* SUBMIT BUTTON */}
             <Button
               type="submit"
-              className="w-full h-12 gradient-primary"
+              className="w-full h-12 bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 text-white shadow-md"
               disabled={isLoading}
             >
               {isLoading ? "Creating Account..." : "Create Account"}
@@ -164,7 +186,9 @@ const Signup = () => {
           {/* DIVIDER */}
           <div className="flex items-center my-6">
             <div className="flex-grow h-px bg-border"></div>
-            <span className="px-3 text-sm text-muted-foreground">OR</span>
+            <span className="px-3 text-sm text-muted-foreground">
+              OR CONTINUE WITH
+            </span>
             <div className="flex-grow h-px bg-border"></div>
           </div>
 
@@ -172,15 +196,22 @@ const Signup = () => {
           <div className="flex justify-center">
             <GoogleLogin
               onSuccess={handleGoogleSignup}
-              onError={() => setError("Google Login Failed")}
+              onError={() => setError("Google Signup Failed")}
+              theme="outline"
+              size="large"
+              text="signup_with"
+              shape="pill"
             />
           </div>
 
           {/* LOGIN LINK */}
           <p className="text-center text-muted-foreground mt-6">
             Already have an account?{" "}
-            <Link to="/login" className="text-primary hover:underline font-medium">
-              Sign in
+            <Link
+              to="/login"
+              className="text-primary hover:underline font-semibold"
+            >
+              Sign In
             </Link>
           </p>
         </div>
