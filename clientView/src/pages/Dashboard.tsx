@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import GoalCard, { Goal } from "@/components/GoalCard";
 import ProfileCard from "@/components/ProfileCard";
-import { getCookie } from "../utils.ts";
 
 const mockGoals: Goal[] = [
   { id: "1", title: "Muscle Building", type: "gym", progress: 65, currentTask: "Chest & Triceps workout", daysLeft: 21 },
@@ -30,13 +29,21 @@ const Dashboard = () => {
   ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleLogout = () => {
-    const token = getCookie("token");
-    if (token) {
+  const handleLogout = async () => {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+    try {
+      await axios.post(
+        `${API_BASE_URL}/logout`,
+        {},
+        { withCredentials: true }
+      );
+    } catch (error) {
+      console.warn("Logout request failed", error);
+    } finally {
       localStorage.removeItem("user");
-      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      localStorage.removeItem("token");
+      navigate("/login");
     }
-    navigate("/login");
   };
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -58,10 +65,15 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate("/login");
+      return;
+    }
+
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, isBotOpen]);
+  }, [messages, isBotOpen, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 relative overflow-hidden">

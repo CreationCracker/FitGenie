@@ -5,9 +5,8 @@ import { Eye, EyeOff, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
-import { useEffect } from "react";
-
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -17,24 +16,45 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+  // Helper to handle successful auth
+  const handleAuthSuccess = (token: string, user: any) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+    navigate("/dashboard");
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const response = await axios.post(`${API_BASE_URL}/login`, {
         email,
         password
-      });
-
-      document.cookie = `token=${response.data.token}; max-age=86400; path=/; SameSite=Strict; Secure`;
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-
-      navigate("/dashboard");
+      }, { withCredentials: true }); // Ensures the browser accepts the HttpOnly cookie
+      
+      handleAuthSuccess(response.data.token, response.data.user);
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Login failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const res = await axios.post(`${API_BASE_URL}/auth/google`, {
+        token: credentialResponse.credential,
+      }, { withCredentials: true });
+      
+      handleAuthSuccess(res.data.token, res.data.user);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Google Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -112,6 +132,27 @@ const Login = () => {
               {isLoading ? "Signing In..." : "Sign In"}
             </Button>
           </form>
+
+          {/* Visual Separator */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border"></span>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+
+          {/* Google Login Button */}
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError("Google login failed. Please try again.")}
+              theme="filled_black" 
+              shape="pill"
+              width="100%"
+            />
+          </div>
 
           <p className="text-center text-muted-foreground mt-6">
             Don't have an account?{" "}
