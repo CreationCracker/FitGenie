@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
-import { getCookie } from "../utils.ts";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -26,7 +25,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = getCookie("token"); 
+        const token = localStorage.getItem("token");
         if (!token) {
           navigate("/login");
           return;
@@ -71,7 +70,12 @@ const Profile = () => {
     setMessage({ type: "", text: "" });
 
     try {
-      const token = getCookie("token");
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
       const parsedMedicalIssues = formData.medicalIssues

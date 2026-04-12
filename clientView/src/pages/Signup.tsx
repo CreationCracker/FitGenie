@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from "axios";
-import {getCookie} from "../utils.ts";``
+import { GoogleLogin } from "@react-oauth/google";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -17,32 +17,54 @@ const Signup = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-const handleSignup = async (e: React.FormEvent) => {
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+  // Helper to handle successful auth
+  const handleAuthSuccess = (token: string, user: any) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+    navigate("/onboarding");
+  };
+
+  // ================= NORMAL SIGNUP =================
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const response = await axios.post(`${API_BASE_URL}/signup`, {
         name,
         email,
-        password
-      });
+        password,
+      }, { withCredentials: true }); // Ensures the browser accepts the HttpOnly cookie
 
-
-      document.cookie = `token=${response.data.token}; max-age=86400; path=/; SameSite=Strict; Secure`;
-
-
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-
-      navigate("/onboarding");
+      handleAuthSuccess(response.data.token, response.data.user);
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || "Signup failed");
+      setError(err.response?.data?.message || "Signup failed");
     } finally {
       setIsLoading(false);
     }
   };
+
+  // ================= GOOGLE SIGNUP =================
+  const handleGoogleSignup = async (credentialResponse: any) => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const res = await axios.post(`${API_BASE_URL}/auth/google`, {
+        token: credentialResponse.credential,
+      }, { withCredentials: true });
+
+      handleAuthSuccess(res.data.token, res.data.user);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Google signup failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <motion.div
@@ -51,6 +73,7 @@ const handleSignup = async (e: React.FormEvent) => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
+        {/* HEADER */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary mb-4">
             <Dumbbell className="w-8 h-8 text-primary-foreground" />
@@ -64,41 +87,46 @@ const handleSignup = async (e: React.FormEvent) => {
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-8">
-          <form onSubmit={handleSignup} className="space-y-5">
-            {error && (
-              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-                {error}
-              </div>
-            )}
+          {/* ERROR */}
+          {error && (
+            <div className="p-3 mb-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+              {error}
+            </div>
+          )}
 
+          {/* FORM */}
+          <form onSubmit={handleSignup} className="space-y-5">
+            {/* NAME */}
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-foreground">Full Name</Label>
+              <Label htmlFor="name">Full Name</Label>
               <Input
                 id="name"
                 type="text"
                 placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="bg-secondary border-border text-foreground placeholder:text-muted-foreground h-12"
                 disabled={isLoading}
+                className="h-12"
               />
             </div>
 
+            {/* EMAIL */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">Email</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-secondary border-border text-foreground placeholder:text-muted-foreground h-12"
                 disabled={isLoading}
+                className="h-12"
               />
             </div>
 
+            {/* PASSWORD */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground">Password</Label>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -106,29 +134,49 @@ const handleSignup = async (e: React.FormEvent) => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-secondary border-border text-foreground placeholder:text-muted-foreground h-12 pr-10"
                   disabled={isLoading}
+                  className="h-12 pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  disabled={isLoading}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             </div>
 
+            {/* SUBMIT */}
             <Button
               type="submit"
-              className="w-full h-12 gradient-primary text-primary-foreground font-semibold text-base hover:opacity-90 transition-opacity"
+              className="w-full h-12 gradient-primary"
               disabled={isLoading}
             >
               {isLoading ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
 
+          {/* DIVIDER */}
+          <div className="flex items-center my-6">
+            <div className="flex-grow h-px bg-border"></div>
+            <span className="px-3 text-sm text-muted-foreground">OR</span>
+            <div className="flex-grow h-px bg-border"></div>
+          </div>
+
+          {/* GOOGLE SIGNUP */}
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSignup}
+              onError={() => setError("Google Login Failed")}
+            />
+          </div>
+
+          {/* LOGIN LINK */}
           <p className="text-center text-muted-foreground mt-6">
             Already have an account?{" "}
             <Link to="/login" className="text-primary hover:underline font-medium">
