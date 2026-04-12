@@ -5,7 +5,9 @@ export type FitnessLevel = "beginner" | "intermediate" | "advanced";
 export interface IUser extends Document {
   name: string;
   email: string;
-  passwordHash: string;
+  passwordHash?: string; 
+  googleId?: string;     
+  image?: string;        
   age?: number;
   heightCm?: number;
   weightKg?: number;
@@ -22,7 +24,14 @@ const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    passwordHash: { type: String, required: true },
+    passwordHash: { 
+      type: String, 
+      required: function(this: IUser) { 
+        return !this.googleId; 
+      } 
+    },
+    googleId: { type: String, unique: true, sparse: true },
+    image: { type: String },
     age: { type: Number, min: 1, max: 120 },
     heightCm: { type: Number, min: 50, max: 300 },
     weightKg: { type: Number, min: 20, max: 500 },
@@ -31,7 +40,6 @@ const UserSchema = new Schema<IUser>(
       enum: ["beginner", "intermediate", "advanced"],
       default: "beginner"
     },
-    // Added: Defines an array of strings, trimming whitespace from each entry
     medicalIssues: [{ type: String, trim: true }], 
     memberSince: { type: Date, default: Date.now },
     streak: { type: Number, default: 0 },

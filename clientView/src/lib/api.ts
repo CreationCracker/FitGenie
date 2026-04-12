@@ -32,6 +32,7 @@ class ApiClient {
   constructor(baseURL: string) {
     this.axiosInstance = axios.create({
       baseURL,
+      withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -53,12 +54,21 @@ class ApiClient {
   }
 
   async login(data: LoginRequest): Promise<AuthResponse> {
-    const response = await this.axiosInstance.post<AuthResponse>('/api/users/login', data);
+    const response = await this.axiosInstance.post<AuthResponse>('/login', data);
     return response.data;
   }
 
   async signup(data: SignupRequest): Promise<AuthResponse> {
-    const response = await this.axiosInstance.post<AuthResponse>('/api/users/signup', data);
+    const response = await this.axiosInstance.post<AuthResponse>('/signup', data);
+    return response.data;
+  }
+
+  async logout(): Promise<void> {
+    await this.axiosInstance.post('/logout');
+  }
+
+  async me(): Promise<{ user: AuthResponse['user'] }> {
+    const response = await this.axiosInstance.get<{ user: AuthResponse['user'] }>('/me');
     return response.data;
   }
 }
