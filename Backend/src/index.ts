@@ -1,58 +1,52 @@
-//Imports 
-
-
-import express, { Request, Response, NextFunction } from 'express';
-import 'dotenv/config';
-import { connectDB } from './database.js';
-import userRoutes from './routes/userRoutes.js';
+import "dotenv/config";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+import { connectDB } from "./database.js";
+import userRoutes from "./routes/userRoutes.js";
 
-
-
-//definitions
+// Configs
 const PORT = process.env.PORT || 3000;
-
-
-
-
-//setup
-
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:8080";
 
 const app = express();
 
+// ✅ CORS CONFIG (VERY IMPORTANT for Google Auth + Cookies)
+app.use(
+  cors({
+    origin: CLIENT_ORIGIN,
+    credentials: true,
+  })
+);
 
-
-
-//middlewares
-
-
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
-});
+// ✅ Middlewares
 app.use(express.json());
-connectDB()
-app.use(cors());
+app.use(cookieParser());
 
+// ✅ Routes
+app.use("/", userRoutes);
 
+// ✅ Global Error Handler
+const errorHandler = (
+  err: Error,
+  _req: Request,
+  res: Response,
+  _next: NextFunction
+) => {
+  console.error(err.stack);
+  res.status(500).json({ message: "Something broke!" });
+};
 
-//routes
+app.use(errorHandler);
 
-
-app.use('/', userRoutes);
-
-
-//server listening
-
-
+// ✅ Server Start
 const start = async () => {
   try {
     await connectDB();
 
     app.listen(PORT, () => {
-      console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
+      console.log(`⚡ Server running at http://localhost:${PORT}`);
     });
-
   } catch (err) {
     console.error("❌ DB connection failed", err);
     process.exit(1);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Activity } from "lucide-react";
@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from "axios";
-import {getCookie} from "../utils.ts";
 
 type FitnessLevel = "beginner" | "intermediate" | "advanced";
 
@@ -23,24 +22,28 @@ const Onboarding = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
   const handleUpdateDetails = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
     try {
-      const token = getCookie("token");
+      const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token found");
 
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      
-      
+
       const parsedMedicalIssues = medicalIssuesInput
         .split(",")
         .map((issue) => issue.trim())
         .filter((issue) => issue.length > 0);
 
-     
       const response = await axios.put(
         `${API_BASE_URL}/update-profile`, 
         {
@@ -52,7 +55,7 @@ const Onboarding = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${token}` 
+            Authorization: `Bearer ${token}`
           }
         }
       );
