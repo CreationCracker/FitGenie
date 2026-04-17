@@ -31,7 +31,7 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/login`, {
+      const response = await axios.post(`${API_BASE_URL}/user/login`, {
         email,
         password
       }, { withCredentials: true }); // Ensures the browser accepts the HttpOnly cookie
