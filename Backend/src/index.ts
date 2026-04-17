@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./database.js";
 import userRoutes from "./routes/userRoutes.js";
+import goalRoutes from "./routes/goalRoutes.js";
 
 // Configs
 const PORT = process.env.PORT || 3000;
@@ -24,7 +25,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ✅ Routes
-app.use("/", userRoutes);
+app.use("/user", userRoutes);
+app.use("/goals", goalRoutes);
 
 // ✅ Global Error Handler
 const errorHandler = (
@@ -48,9 +50,26 @@ const start = async () => {
       console.log(`⚡ Server running at http://localhost:${PORT}`);
     });
   } catch (err) {
-    console.error("❌ DB connection failed", err);
+    console.error("❌ Server failed to start:");
+    if (err instanceof Error) {
+      console.error("Error:", err.message);
+      console.error("Stack:", err.stack);
+    } else {
+      console.error("Unknown error:", err);
+    }
     process.exit(1);
   }
 };
 
 start();
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('❌ Unhandled Rejection:', reason);
+  process.exit(1);
+});
