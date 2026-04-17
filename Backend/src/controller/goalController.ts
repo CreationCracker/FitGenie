@@ -60,6 +60,7 @@ export const toggleTaskStatus = async (req: AuthRequest, res: Response): Promise
  */
 export const createGoalWithAI = async (req: Request, res: Response): Promise<void> => {
   try {
+
     const { userId, title, type, physiqueTarget, durationDays, medicalConditions, dietPreference, notes } = req.body;
 
     // 1. Validation
@@ -67,7 +68,7 @@ export const createGoalWithAI = async (req: Request, res: Response): Promise<voi
       res.status(400).json({ error: "Missing required fields" });
       return;
     }
-
+    console.log(req.body);
     const user: IUser | null = await User.findById(userId);
     if (!user) {
       res.status(404).json({ error: "User not found" });
@@ -109,7 +110,7 @@ const formattedStartDate = new Date().toISOString().split('T')[0];
         days_per_week: 4
       }
     };
-
+    console.log("[Backend] AI Payload:", JSON.stringify(aiPayload, null, 2));
     // 4. Call Python AI service
     const aiServiceUrl = process.env.AI_SERVICE_URL || "http://localhost:8001";
     console.log(`[Backend] Sending request to AI: ${aiServiceUrl}/generate-schedule`);
@@ -125,7 +126,7 @@ const formattedStartDate = new Date().toISOString().split('T')[0];
       console.error("[Backend] AI Service Error:", errorData);
       throw new Error(`AI Service failed: ${aiResponse.status} - ${errorData}`);
     }
-
+    console.log("[Backend] AI Response:", JSON.stringify(await aiResponse.json(), null, 2));
     const aiData = await aiResponse.json() as any;
 
     // 5. Map AI tasks to MongoDB Schema

@@ -6,7 +6,7 @@ pydantic
 # AI, Agents, & Graph Logic
 langchain
 langchain-core
-langchain-openai
+langchain-google-genai
 langgraph
 
 # RAG / Vector Database (For rag_agent.py)
