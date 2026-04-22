@@ -189,3 +189,21 @@ const formattedStartDate = new Date().toISOString().split('T')[0];
     });
   }
 };
+
+
+
+
+export const getGoal = async (req: AuthRequest, res: Response): Promise<void> => {
+  const { goalId } = req.params;
+  try {
+    const goal = await Goal.findById(goalId);
+    if (!goal) {
+      res.status(404).json({ message: "Goal not found" });
+      return;
+    }
+    res.status(200).json(goal);
+  } catch (error) {
+    console.error("Get Goal Error:", error);
+    res.status(500).json({ message: "Error fetching goal" });
+  }
+};
