@@ -1,3 +1,4 @@
+
 import os
 import json
 from typing import List, Optional
@@ -36,8 +37,8 @@ class OrchestratorDecision(BaseModel):
 def orchestrator_node(state: MasterGraphState) -> dict:
     print("[Orchestrator] Analyzing frontend inputs...")
 
-    # FIX: Corrected model name
     model = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite-preview", temperature=0.0)
+
     structured_model = model.with_structured_output(OrchestratorDecision)
 
     context_summary = f"""
@@ -47,7 +48,6 @@ Primary Targets: {state.get('primary_targets', [])}
 Medical Conditions: {state.get('medical_conditions', [])}
 """
 
-    # FIX: Removed emojis from system prompt to avoid Gemini safety filter triggers
     system_prompt = """You are the Master Orchestrator for a fitness application.
 Analyze the user's profile and determine which agents need to run.
 Translate any Medical Conditions into strict, actionable context updates for the downstream agents.
@@ -80,11 +80,9 @@ For example:
 # HUMAN-IN-THE-LOOP (HITL) NODES
 # ==========================================
 def human_review_node(state: MasterGraphState) -> dict:
-    """Dummy node where the graph pauses for user feedback."""
     return {}
 
 def route_from_orchestrator(state: MasterGraphState) -> List[str]:
-    """Fan-Out: Sends the initial request to the required agents."""
     destinations = []
     if state.get("route_to_meal"):
         destinations.append("meal_planner")
@@ -95,7 +93,6 @@ def route_from_orchestrator(state: MasterGraphState) -> List[str]:
     return destinations
 
 def route_after_human(state: MasterGraphState) -> List[str]:
-    """Routing logic based on specific human feedback."""
     if state.get("is_satisfied"):
         return [END]
 
@@ -137,6 +134,7 @@ app = workflow.compile(checkpointer=memory, interrupt_before=["human_review"])
 if __name__ == "__main__":
 
     frontend_payload = {
+        # --- User inputs ---
         "user_prompt": "I want to get back in shape for my wedding.",
         "selected_categories": ["Gym / Strength", "Diet Only"],
         "primary_targets": ["Lose Weight", "Build Muscle"],
@@ -148,7 +146,11 @@ if __name__ == "__main__":
         "days_per_week": 2,
         "fitness_level": "Intermediate",
         "available_equipment": ["Dumbbells"],
-        # FIX: Pre-initialize optional fields to avoid KeyError in agents
+
+        # --- DATE INPUT: plans will start from the day AFTER this date ---
+        "start_date": "2025-07-10",   # <-- change this to your desired start date
+
+        # --- Pre-initialized optional fields ---
         "meal_user_context": None,
         "exercise_user_context": None,
         "generated_meal_plan": None,
@@ -165,8 +167,10 @@ if __name__ == "__main__":
     config = {"configurable": {"thread_id": "production_user_001"}}
 
     with open("output.txt", "w", encoding="utf-8") as f:
-        print("\n[START] Starting Master Orchestrator Workflow...")
-        f.write("Starting Master Orchestrator Workflow...\n\n")
+        print(f"\n[START] Plans will run from: {frontend_payload['start_date']} + 1 day onwards")
+        print("[START] Starting Master Orchestrator Workflow...")
+        f.write(f"Start Date Input: {frontend_payload['start_date']}\n")
+        f.write("Plans begin from the following day.\n\n")
 
         for event in app.stream(frontend_payload, config=config):
             pass
@@ -179,24 +183,23 @@ if __name__ == "__main__":
             print("PLANS GENERATED!")
             f.write("=" * 50 + "\nNEW PLANS GENERATED\n" + "=" * 50 + "\n")
 
-            # Log Meal Plan
+            # Preview Meal Plan
             if current_state.get("generated_meal_plan"):
                 print("\nMEAL PLAN PREVIEW:")
-                m_plan = current_state["generated_meal_plan"][0]
-                print(f"  Day 1: {m_plan['total_daily_calories']} kcal, {m_plan['total_daily_protein']}g protein")
-
+                for day in current_state["generated_meal_plan"][:2]:
+                    print(f"  {day.get('date')} ({day.get('day_label')}): "
+                          f"{day['total_daily_calories']} kcal, {day['total_daily_protein']}g protein")
                 f.write("\n--- FULL MEAL PLAN ---\n")
                 f.write(json.dumps(current_state["generated_meal_plan"], indent=4))
                 f.write("\n")
             else:
                 print("  (No meal plan generated)")
 
-            # Log Workout Plan
+            # Preview Workout Plan
             if current_state.get("generated_workout_plan"):
                 print("\nWORKOUT PLAN PREVIEW:")
-                w_plan = current_state["generated_workout_plan"][0]
-                print(f"  Day 1 Focus: {w_plan['focus']}")
-
+                for day in current_state["generated_workout_plan"][:2]:
+                    print(f"  {day.get('date')} ({day.get('day_label')}): {day['focus']}")
                 f.write("\n--- FULL WORKOUT PLAN ---\n")
                 f.write(json.dumps(current_state["generated_workout_plan"], indent=4))
                 f.write("\n")
@@ -218,9 +221,9 @@ if __name__ == "__main__":
                 break
 
             elif user_choice in ["n", "no"]:
-                print("\nLet's fix it. Leave blank if you don't have feedback for that specific plan.")
-                m_feedback = input("Feedback for Meals (or press Enter to skip): ").strip()
-                e_feedback = input("Feedback for Exercise (or press Enter to skip): ").strip()
+                print("\nLet's fix it. Leave blank to skip feedback for a specific plan.")
+                m_feedback = input("Feedback for Meals (or Enter to skip): ").strip()
+                e_feedback = input("Feedback for Exercise (or Enter to skip): ").strip()
 
                 f.write(f"Meal Feedback: {m_feedback}\nExercise Feedback: {e_feedback}\n\n")
 
@@ -241,3 +244,5 @@ if __name__ == "__main__":
 
             else:
                 print("Invalid input. Please type 'y' or 'n'.")
+
+
