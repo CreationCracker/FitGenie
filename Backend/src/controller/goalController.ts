@@ -126,9 +126,9 @@ const formattedStartDate = new Date().toISOString().split('T')[0];
       console.error("[Backend] AI Service Error:", errorData);
       throw new Error(`AI Service failed: ${aiResponse.status} - ${errorData}`);
     }
-    console.log("[Backend] AI Response:", JSON.stringify(await aiResponse.json(), null, 2));
+   
     const aiData = await aiResponse.json() as any;
-
+    console.log("[Backend] AI Response:", JSON.stringify(aiData, null, 2));
     // 5. Map AI tasks to MongoDB Schema
     let tasks: ITask[] = [];
     if (aiData?.tasks && Array.isArray(aiData.tasks)) {
