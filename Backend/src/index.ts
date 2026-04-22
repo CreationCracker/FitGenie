@@ -15,7 +15,10 @@ const app = express();
 // ✅ CORS CONFIG (VERY IMPORTANT for Google Auth + Cookies)
 app.use(
   cors({
-    origin: CLIENT_ORIGIN,
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:8080", // optional
+    ],
     credentials: true,
   })
 );
