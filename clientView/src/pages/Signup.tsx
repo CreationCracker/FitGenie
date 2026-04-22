@@ -64,7 +64,7 @@ const Signup = () => {
 
     try {
       const res = await axios.post(
-        `${API_BASE_URL}/auth/google/signup`, // Dedicated signup route
+        `${API_BASE_URL}/user/auth/google/signup`, // Dedicated signup route
         {
           token: credentialResponse.credential,
         },

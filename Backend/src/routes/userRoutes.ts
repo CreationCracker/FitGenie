@@ -7,8 +7,10 @@ import {
   googleLogin,
   logoutUser,
   getCurrentUser,
+  getMyGoals
 } from "../controller/userController.js";
 import { requireAuth } from "../middleware/auth.js"; 
+import { get } from "mongoose";
 
 const router = Router();
 
@@ -22,5 +24,6 @@ router.post('/logout', logoutUser);
 router.get('/me', requireAuth, getCurrentUser);
 router.put("/update-profile", requireAuth, updateProfile);
 router.get("/profile", requireAuth, getUserProfile);
+router.get("/getMyGoals",requireAuth,getMyGoals);
 
 export default router;
