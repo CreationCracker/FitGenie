@@ -1,2 +1,451 @@
-🚀 Starting Master Orchestrator Workflow...
+Starting Master Orchestrator Workflow...
 
+==================================================
+NEW PLANS GENERATED
+==================================================
+
+--- FULL MEAL PLAN ---
+[
+    {
+        "day": 1,
+        "meals": [
+            {
+                "name": "Protein-Packed Yogurt Bowl",
+                "ingredients": [
+                    "1.5 cups Greek Yogurt",
+                    "1 scoop Protein Powder",
+                    "1 tbsp Chia Seeds",
+                    "1/2 cup Blueberries",
+                    "10 Almonds"
+                ],
+                "calories": 550,
+                "protein": 45
+            },
+            {
+                "name": "Spinach & Feta Scramble with Toast",
+                "ingredients": [
+                    "3 large Eggs",
+                    "2 slices Whole Wheat Bread",
+                    "1 cup Spinach",
+                    "1 oz Feta Cheese"
+                ],
+                "calories": 550,
+                "protein": 35
+            },
+            {
+                "name": "Mediterranean Quinoa & Chickpea Bowl",
+                "ingredients": [
+                    "1 cup cooked Quinoa",
+                    "1 cup Chickpeas",
+                    "1 cup Cucumber, Tomato, Onion salad",
+                    "1 tbsp Olive Oil"
+                ],
+                "calories": 550,
+                "protein": 25
+            },
+            {
+                "name": "Tofu & Broccoli Stir-fry",
+                "ingredients": [
+                    "200g Tofu",
+                    "1 cup Broccoli",
+                    "1/2 cup Brown Rice",
+                    "Soy Sauce, Garlic, Ginger glaze"
+                ],
+                "calories": 550,
+                "protein": 35
+            }
+        ],
+        "total_daily_calories": 2200,
+        "total_daily_protein": 140
+    },
+    {
+        "day": 2,
+        "meals": [
+            {
+                "name": "Protein-Packed Yogurt Bowl",
+                "ingredients": [
+                    "1.5 cups Greek Yogurt",
+                    "1 scoop Protein Powder",
+                    "1 tbsp Chia Seeds",
+                    "1/2 cup Blueberries",
+                    "10 Almonds"
+                ],
+                "calories": 550,
+                "protein": 45
+            },
+            {
+                "name": "Spinach & Feta Scramble with Toast",
+                "ingredients": [
+                    "3 large Eggs",
+                    "2 slices Whole Wheat Bread",
+                    "1 cup Spinach",
+                    "1 oz Feta Cheese"
+                ],
+                "calories": 550,
+                "protein": 35
+            },
+            {
+                "name": "Mediterranean Quinoa & Chickpea Bowl",
+                "ingredients": [
+                    "1 cup cooked Quinoa",
+                    "1 cup Chickpeas",
+                    "1 cup Cucumber, Tomato, Onion salad",
+                    "1 tbsp Olive Oil"
+                ],
+                "calories": 550,
+                "protein": 25
+            },
+            {
+                "name": "Tofu & Broccoli Stir-fry",
+                "ingredients": [
+                    "200g Tofu",
+                    "1 cup Broccoli",
+                    "1/2 cup Brown Rice",
+                    "Soy Sauce, Garlic, Ginger glaze"
+                ],
+                "calories": 550,
+                "protein": 35
+            }
+        ],
+        "total_daily_calories": 2200,
+        "total_daily_protein": 140
+    }
+]
+
+--- FULL WORKOUT PLAN ---
+[
+    {
+        "day": 1,
+        "focus": "Full Body Strength",
+        "exercises": [
+            {
+                "name": "Dumbbell Floor Press",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 90,
+                "notes": "Keep core tight, press dumbbells up without locking elbows."
+            },
+            {
+                "name": "Dumbbell Romanian Deadlift (Light/Controlled)",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 90,
+                "notes": "Focus on hinge movement, slight knee bend, keep back flat. Stop if knee pain occurs."
+            },
+            {
+                "name": "Dumbbell Seated Overhead Press",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 90,
+                "notes": "Maintain neutral spine against a bench or chair."
+            },
+            {
+                "name": "Dumbbell Bent Over Row",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 90,
+                "notes": "Keep back flat, pull dumbbells toward hips."
+            },
+            {
+                "name": "Plank",
+                "sets": 3,
+                "reps_or_duration": "45-60 seconds",
+                "rest_seconds": 60,
+                "notes": "Engage core, keep body in a straight line."
+            }
+        ]
+    },
+    {
+        "day": 2,
+        "focus": "Rest Day",
+        "exercises": []
+    },
+    {
+        "day": 3,
+        "focus": "Rest Day",
+        "exercises": []
+    },
+    {
+        "day": 4,
+        "focus": "Full Body Strength",
+        "exercises": [
+            {
+                "name": "Dumbbell Floor Press",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 90,
+                "notes": "Focus on controlled eccentric (lowering) phase."
+            },
+            {
+                "name": "Dumbbell Romanian Deadlift (Light/Controlled)",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 90,
+                "notes": "Focus on hinge movement, slight knee bend, keep back flat."
+            },
+            {
+                "name": "Dumbbell Seated Overhead Press",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 90,
+                "notes": "Maintain neutral spine against a bench or chair."
+            },
+            {
+                "name": "Dumbbell Bent Over Row",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 90,
+                "notes": "Keep back flat, pull dumbbells toward hips."
+            },
+            {
+                "name": "Plank",
+                "sets": 3,
+                "reps_or_duration": "45-60 seconds",
+                "rest_seconds": 60,
+                "notes": "Engage core, keep body in a straight line."
+            }
+        ]
+    },
+    {
+        "day": 5,
+        "focus": "Rest Day",
+        "exercises": []
+    },
+    {
+        "day": 6,
+        "focus": "Rest Day",
+        "exercises": []
+    },
+    {
+        "day": 7,
+        "focus": "Rest Day",
+        "exercises": []
+    }
+]
+
+[USER RESPONSE: Satisfied? -> n]
+Meal Feedback: I want traditional indian low calorie diet
+Exercise Feedback: i eant yoga also be submerged in my plan
+
+Regenerating...
+
+==================================================
+NEW PLANS GENERATED
+==================================================
+
+--- FULL MEAL PLAN ---
+[
+    {
+        "day": 1,
+        "meals": [
+            {
+                "name": "Protein-Packed Yogurt Bowl",
+                "ingredients": [
+                    "1 cup Greek Yogurt",
+                    "1 scoop Whey Protein",
+                    "10 Almonds",
+                    "1 tsp Chia seeds"
+                ],
+                "calories": 550,
+                "protein": 40
+            },
+            {
+                "name": "Dal-Roti-Sabzi Lunch",
+                "ingredients": [
+                    "1 cup cooked Moong Dal",
+                    "2 Whole Wheat Rotis",
+                    "1 cup Spinach Sabzi (cooked with minimal oil)",
+                    "1/2 cup Cucumber Salad"
+                ],
+                "calories": 600,
+                "protein": 35
+            },
+            {
+                "name": "Paneer & Veggie Stir-fry",
+                "ingredients": [
+                    "150g Paneer cubes (saut\u00e9ed)",
+                    "1 cup Mixed Vegetable Curry (minimal oil)",
+                    "1/2 cup Brown Rice"
+                ],
+                "calories": 450,
+                "protein": 35
+            },
+            {
+                "name": "Chana Masala Dinner",
+                "ingredients": [
+                    "1.5 cups Chickpea Curry (Chana Masala)",
+                    "1 Whole Wheat Roti",
+                    "1 cup Greek Yogurt"
+                ],
+                "calories": 600,
+                "protein": 30
+            }
+        ],
+        "total_daily_calories": 2200,
+        "total_daily_protein": 140
+    },
+    {
+        "day": 2,
+        "meals": [
+            {
+                "name": "Protein-Packed Yogurt Bowl",
+                "ingredients": [
+                    "1 cup Greek Yogurt",
+                    "1 scoop Whey Protein",
+                    "10 Almonds",
+                    "1 tsp Chia seeds"
+                ],
+                "calories": 550,
+                "protein": 40
+            },
+            {
+                "name": "Dal-Roti-Sabzi Lunch",
+                "ingredients": [
+                    "1 cup cooked Moong Dal",
+                    "2 Whole Wheat Rotis",
+                    "1 cup Spinach Sabzi (cooked with minimal oil)",
+                    "1/2 cup Cucumber Salad"
+                ],
+                "calories": 600,
+                "protein": 35
+            },
+            {
+                "name": "Paneer & Veggie Stir-fry",
+                "ingredients": [
+                    "150g Paneer cubes (saut\u00e9ed)",
+                    "1 cup Mixed Vegetable Curry (minimal oil)",
+                    "1/2 cup Brown Rice"
+                ],
+                "calories": 450,
+                "protein": 35
+            },
+            {
+                "name": "Chana Masala Dinner",
+                "ingredients": [
+                    "1.5 cups Chickpea Curry (Chana Masala)",
+                    "1 Whole Wheat Roti",
+                    "1 cup Greek Yogurt"
+                ],
+                "calories": 600,
+                "protein": 30
+            }
+        ],
+        "total_daily_calories": 2200,
+        "total_daily_protein": 140
+    }
+]
+
+--- FULL WORKOUT PLAN ---
+[
+    {
+        "day": 1,
+        "focus": "Strength & Mobility",
+        "exercises": [
+            {
+                "name": "Dumbbell Chest Press (Floor)",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 60,
+                "notes": "Keep core engaged, press from floor to avoid excessive range of motion."
+            },
+            {
+                "name": "Dumbbell Bent-Over Rows",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 60,
+                "notes": "Maintain a flat back, hinge at hips without bending knees deeply."
+            },
+            {
+                "name": "Dumbbell Overhead Press (Seated)",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 60,
+                "notes": "Use a chair for back support to protect the spine."
+            },
+            {
+                "name": "Glute Bridges",
+                "sets": 3,
+                "reps_or_duration": "15",
+                "rest_seconds": 45,
+                "notes": "Squeeze glutes at the top, keep knees stable."
+            },
+            {
+                "name": "Yoga Flow: Cat-Cow to Child's Pose",
+                "sets": 1,
+                "reps_or_duration": "10 mins",
+                "rest_seconds": 0,
+                "notes": "Gentle movement, focus on breath and spine mobility."
+            }
+        ]
+    },
+    {
+        "day": 2,
+        "focus": "Rest Day",
+        "exercises": []
+    },
+    {
+        "day": 3,
+        "focus": "Rest Day",
+        "exercises": []
+    },
+    {
+        "day": 4,
+        "focus": "Strength & Mobility",
+        "exercises": [
+            {
+                "name": "Dumbbell Chest Press (Floor)",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 60,
+                "notes": "Focus on controlled eccentric (lowering) phase."
+            },
+            {
+                "name": "Dumbbell Bent-Over Rows",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 60,
+                "notes": "Focus on squeezing shoulder blades together."
+            },
+            {
+                "name": "Dumbbell Overhead Press (Seated)",
+                "sets": 3,
+                "reps_or_duration": "10-12",
+                "rest_seconds": 60,
+                "notes": "Keep core tight to avoid arching the back."
+            },
+            {
+                "name": "Glute Bridges",
+                "sets": 3,
+                "reps_or_duration": "15",
+                "rest_seconds": 45,
+                "notes": "Hold the top position for 2 seconds."
+            },
+            {
+                "name": "Yoga Flow: Seated Forward Fold & Spinal Twist",
+                "sets": 1,
+                "reps_or_duration": "10 mins",
+                "rest_seconds": 0,
+                "notes": "Focus on deep breathing and gentle stretching."
+            }
+        ]
+    },
+    {
+        "day": 5,
+        "focus": "Rest Day",
+        "exercises": []
+    },
+    {
+        "day": 6,
+        "focus": "Rest Day",
+        "exercises": []
+    },
+    {
+        "day": 7,
+        "focus": "Rest Day",
+        "exercises": []
+    }
+]
+
+[USER RESPONSE: Satisfied? -> y]
+
+GRAPH FINISHED AND APPROVED.
