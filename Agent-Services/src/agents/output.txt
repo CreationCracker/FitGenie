@@ -1,4 +1,5 @@
-Starting Master Orchestrator Workflow...
+Start Date Input: 2025-07-10
+Plans begin from the following day.
 
 ==================================================
 NEW PLANS GENERATED
@@ -7,277 +8,51 @@ NEW PLANS GENERATED
 --- FULL MEAL PLAN ---
 [
     {
-        "day": 1,
+        "date": "2025-07-11",
+        "day_label": "Friday",
         "meals": [
             {
-                "name": "Protein-Packed Yogurt Bowl",
+                "name": "Protein Power Yogurt Bowl",
                 "ingredients": [
-                    "1.5 cups Greek Yogurt",
-                    "1 scoop Protein Powder",
-                    "1 tbsp Chia Seeds",
-                    "1/2 cup Blueberries",
-                    "10 Almonds"
+                    "200g Greek Yogurt",
+                    "30g Protein Powder",
+                    "50g Berries",
+                    "20g Almonds"
                 ],
                 "calories": 550,
                 "protein": 45
             },
             {
-                "name": "Spinach & Feta Scramble with Toast",
+                "name": "Tofu & Quinoa Power Bowl",
                 "ingredients": [
-                    "3 large Eggs",
-                    "2 slices Whole Wheat Bread",
-                    "1 cup Spinach",
-                    "1 oz Feta Cheese"
-                ],
-                "calories": 550,
-                "protein": 35
-            },
-            {
-                "name": "Mediterranean Quinoa & Chickpea Bowl",
-                "ingredients": [
-                    "1 cup cooked Quinoa",
-                    "1 cup Chickpeas",
-                    "1 cup Cucumber, Tomato, Onion salad",
+                    "200g Tofu (pan-seared)",
+                    "100g Quinoa (cooked)",
+                    "100g Broccoli",
+                    "1/2 Avocado",
                     "1 tbsp Olive Oil"
                 ],
                 "calories": 550,
-                "protein": 25
-            },
-            {
-                "name": "Tofu & Broccoli Stir-fry",
-                "ingredients": [
-                    "200g Tofu",
-                    "1 cup Broccoli",
-                    "1/2 cup Brown Rice",
-                    "Soy Sauce, Garlic, Ginger glaze"
-                ],
-                "calories": 550,
                 "protein": 35
-            }
-        ],
-        "total_daily_calories": 2200,
-        "total_daily_protein": 140
-    },
-    {
-        "day": 2,
-        "meals": [
-            {
-                "name": "Protein-Packed Yogurt Bowl",
-                "ingredients": [
-                    "1.5 cups Greek Yogurt",
-                    "1 scoop Protein Powder",
-                    "1 tbsp Chia Seeds",
-                    "1/2 cup Blueberries",
-                    "10 Almonds"
-                ],
-                "calories": 550,
-                "protein": 45
             },
             {
-                "name": "Spinach & Feta Scramble with Toast",
+                "name": "Avocado & Egg Toast Plate",
                 "ingredients": [
-                    "3 large Eggs",
+                    "3 Eggs (scrambled)",
                     "2 slices Whole Wheat Bread",
-                    "1 cup Spinach",
-                    "1 oz Feta Cheese"
+                    "100g Spinach",
+                    "1/2 Avocado"
                 ],
                 "calories": 550,
-                "protein": 35
+                "protein": 30
             },
             {
-                "name": "Mediterranean Quinoa & Chickpea Bowl",
+                "name": "Black Bean & Protein Shake Snack",
                 "ingredients": [
-                    "1 cup cooked Quinoa",
-                    "1 cup Chickpeas",
-                    "1 cup Cucumber, Tomato, Onion salad",
-                    "1 tbsp Olive Oil"
+                    "200g Black Beans",
+                    "30g Protein Powder (mixed with water/milk)",
+                    "30g Almonds"
                 ],
                 "calories": 550,
-                "protein": 25
-            },
-            {
-                "name": "Tofu & Broccoli Stir-fry",
-                "ingredients": [
-                    "200g Tofu",
-                    "1 cup Broccoli",
-                    "1/2 cup Brown Rice",
-                    "Soy Sauce, Garlic, Ginger glaze"
-                ],
-                "calories": 550,
-                "protein": 35
-            }
-        ],
-        "total_daily_calories": 2200,
-        "total_daily_protein": 140
-    }
-]
-
---- FULL WORKOUT PLAN ---
-[
-    {
-        "day": 1,
-        "focus": "Full Body Strength",
-        "exercises": [
-            {
-                "name": "Dumbbell Floor Press",
-                "sets": 3,
-                "reps_or_duration": "10-12",
-                "rest_seconds": 90,
-                "notes": "Keep core tight, press dumbbells up without locking elbows."
-            },
-            {
-                "name": "Dumbbell Romanian Deadlift (Light/Controlled)",
-                "sets": 3,
-                "reps_or_duration": "10-12",
-                "rest_seconds": 90,
-                "notes": "Focus on hinge movement, slight knee bend, keep back flat. Stop if knee pain occurs."
-            },
-            {
-                "name": "Dumbbell Seated Overhead Press",
-                "sets": 3,
-                "reps_or_duration": "10-12",
-                "rest_seconds": 90,
-                "notes": "Maintain neutral spine against a bench or chair."
-            },
-            {
-                "name": "Dumbbell Bent Over Row",
-                "sets": 3,
-                "reps_or_duration": "10-12",
-                "rest_seconds": 90,
-                "notes": "Keep back flat, pull dumbbells toward hips."
-            },
-            {
-                "name": "Plank",
-                "sets": 3,
-                "reps_or_duration": "45-60 seconds",
-                "rest_seconds": 60,
-                "notes": "Engage core, keep body in a straight line."
-            }
-        ]
-    },
-    {
-        "day": 2,
-        "focus": "Rest Day",
-        "exercises": []
-    },
-    {
-        "day": 3,
-        "focus": "Rest Day",
-        "exercises": []
-    },
-    {
-        "day": 4,
-        "focus": "Full Body Strength",
-        "exercises": [
-            {
-                "name": "Dumbbell Floor Press",
-                "sets": 3,
-                "reps_or_duration": "10-12",
-                "rest_seconds": 90,
-                "notes": "Focus on controlled eccentric (lowering) phase."
-            },
-            {
-                "name": "Dumbbell Romanian Deadlift (Light/Controlled)",
-                "sets": 3,
-                "reps_or_duration": "10-12",
-                "rest_seconds": 90,
-                "notes": "Focus on hinge movement, slight knee bend, keep back flat."
-            },
-            {
-                "name": "Dumbbell Seated Overhead Press",
-                "sets": 3,
-                "reps_or_duration": "10-12",
-                "rest_seconds": 90,
-                "notes": "Maintain neutral spine against a bench or chair."
-            },
-            {
-                "name": "Dumbbell Bent Over Row",
-                "sets": 3,
-                "reps_or_duration": "10-12",
-                "rest_seconds": 90,
-                "notes": "Keep back flat, pull dumbbells toward hips."
-            },
-            {
-                "name": "Plank",
-                "sets": 3,
-                "reps_or_duration": "45-60 seconds",
-                "rest_seconds": 60,
-                "notes": "Engage core, keep body in a straight line."
-            }
-        ]
-    },
-    {
-        "day": 5,
-        "focus": "Rest Day",
-        "exercises": []
-    },
-    {
-        "day": 6,
-        "focus": "Rest Day",
-        "exercises": []
-    },
-    {
-        "day": 7,
-        "focus": "Rest Day",
-        "exercises": []
-    }
-]
-
-[USER RESPONSE: Satisfied? -> n]
-Meal Feedback: I want traditional indian low calorie diet
-Exercise Feedback: i eant yoga also be submerged in my plan
-
-Regenerating...
-
-==================================================
-NEW PLANS GENERATED
-==================================================
-
---- FULL MEAL PLAN ---
-[
-    {
-        "day": 1,
-        "meals": [
-            {
-                "name": "Protein-Packed Yogurt Bowl",
-                "ingredients": [
-                    "1 cup Greek Yogurt",
-                    "1 scoop Whey Protein",
-                    "10 Almonds",
-                    "1 tsp Chia seeds"
-                ],
-                "calories": 550,
-                "protein": 40
-            },
-            {
-                "name": "Dal-Roti-Sabzi Lunch",
-                "ingredients": [
-                    "1 cup cooked Moong Dal",
-                    "2 Whole Wheat Rotis",
-                    "1 cup Spinach Sabzi (cooked with minimal oil)",
-                    "1/2 cup Cucumber Salad"
-                ],
-                "calories": 600,
-                "protein": 35
-            },
-            {
-                "name": "Paneer & Veggie Stir-fry",
-                "ingredients": [
-                    "150g Paneer cubes (saut\u00e9ed)",
-                    "1 cup Mixed Vegetable Curry (minimal oil)",
-                    "1/2 cup Brown Rice"
-                ],
-                "calories": 450,
-                "protein": 35
-            },
-            {
-                "name": "Chana Masala Dinner",
-                "ingredients": [
-                    "1.5 cups Chickpea Curry (Chana Masala)",
-                    "1 Whole Wheat Roti",
-                    "1 cup Greek Yogurt"
-                ],
-                "calories": 600,
                 "protein": 30
             }
         ],
@@ -285,48 +60,51 @@ NEW PLANS GENERATED
         "total_daily_protein": 140
     },
     {
-        "day": 2,
+        "date": "2025-07-12",
+        "day_label": "Saturday",
         "meals": [
             {
-                "name": "Protein-Packed Yogurt Bowl",
+                "name": "Protein Power Yogurt Bowl",
                 "ingredients": [
-                    "1 cup Greek Yogurt",
-                    "1 scoop Whey Protein",
-                    "10 Almonds",
-                    "1 tsp Chia seeds"
+                    "200g Greek Yogurt",
+                    "30g Protein Powder",
+                    "50g Berries",
+                    "20g Almonds"
                 ],
                 "calories": 550,
-                "protein": 40
+                "protein": 45
             },
             {
-                "name": "Dal-Roti-Sabzi Lunch",
+                "name": "Tofu & Quinoa Power Bowl",
                 "ingredients": [
-                    "1 cup cooked Moong Dal",
-                    "2 Whole Wheat Rotis",
-                    "1 cup Spinach Sabzi (cooked with minimal oil)",
-                    "1/2 cup Cucumber Salad"
+                    "200g Tofu (pan-seared)",
+                    "100g Quinoa (cooked)",
+                    "100g Broccoli",
+                    "1/2 Avocado",
+                    "1 tbsp Olive Oil"
                 ],
-                "calories": 600,
+                "calories": 550,
                 "protein": 35
             },
             {
-                "name": "Paneer & Veggie Stir-fry",
+                "name": "Avocado & Egg Toast Plate",
                 "ingredients": [
-                    "150g Paneer cubes (saut\u00e9ed)",
-                    "1 cup Mixed Vegetable Curry (minimal oil)",
-                    "1/2 cup Brown Rice"
+                    "3 Eggs (scrambled)",
+                    "2 slices Whole Wheat Bread",
+                    "100g Spinach",
+                    "1/2 Avocado"
                 ],
-                "calories": 450,
-                "protein": 35
+                "calories": 550,
+                "protein": 30
             },
             {
-                "name": "Chana Masala Dinner",
+                "name": "Black Bean & Protein Shake Snack",
                 "ingredients": [
-                    "1.5 cups Chickpea Curry (Chana Masala)",
-                    "1 Whole Wheat Roti",
-                    "1 cup Greek Yogurt"
+                    "200g Black Beans",
+                    "30g Protein Powder (mixed with water/milk)",
+                    "30g Almonds"
                 ],
-                "calories": 600,
+                "calories": 550,
                 "protein": 30
             }
         ],
@@ -338,109 +116,116 @@ NEW PLANS GENERATED
 --- FULL WORKOUT PLAN ---
 [
     {
-        "day": 1,
-        "focus": "Strength & Mobility",
+        "date": "2025-07-11",
+        "day_label": "Friday",
+        "focus": "Full Body Strength",
         "exercises": [
             {
-                "name": "Dumbbell Chest Press (Floor)",
+                "name": "Dumbbell Chest Press (on floor)",
                 "sets": 3,
                 "reps_or_duration": "10-12",
                 "rest_seconds": 60,
-                "notes": "Keep core engaged, press from floor to avoid excessive range of motion."
+                "notes": "Keep core engaged, avoid arching back."
             },
             {
-                "name": "Dumbbell Bent-Over Rows",
+                "name": "Dumbbell Rows (supported)",
                 "sets": 3,
                 "reps_or_duration": "10-12",
                 "rest_seconds": 60,
-                "notes": "Maintain a flat back, hinge at hips without bending knees deeply."
+                "notes": "Use a sturdy surface for support, keep back flat."
             },
             {
-                "name": "Dumbbell Overhead Press (Seated)",
+                "name": "Dumbbell Overhead Press (seated)",
                 "sets": 3,
                 "reps_or_duration": "10-12",
                 "rest_seconds": 60,
-                "notes": "Use a chair for back support to protect the spine."
+                "notes": "Use a chair for back support."
             },
             {
                 "name": "Glute Bridges",
                 "sets": 3,
                 "reps_or_duration": "15",
                 "rest_seconds": 45,
-                "notes": "Squeeze glutes at the top, keep knees stable."
+                "notes": "Squeeze glutes at the top, no knee strain."
             },
             {
-                "name": "Yoga Flow: Cat-Cow to Child's Pose",
-                "sets": 1,
-                "reps_or_duration": "10 mins",
-                "rest_seconds": 0,
-                "notes": "Gentle movement, focus on breath and spine mobility."
+                "name": "Plank",
+                "sets": 3,
+                "reps_or_duration": "45 seconds",
+                "rest_seconds": 60,
+                "notes": "Keep body in a straight line."
             }
         ]
     },
     {
-        "day": 2,
+        "date": "2025-07-12",
+        "day_label": "Saturday",
         "focus": "Rest Day",
         "exercises": []
     },
     {
-        "day": 3,
+        "date": "2025-07-13",
+        "day_label": "Sunday",
         "focus": "Rest Day",
         "exercises": []
     },
     {
-        "day": 4,
-        "focus": "Strength & Mobility",
+        "date": "2025-07-14",
+        "day_label": "Monday",
+        "focus": "Upper Body & Core Stability",
         "exercises": [
             {
-                "name": "Dumbbell Chest Press (Floor)",
+                "name": "Dumbbell Floor Press",
                 "sets": 3,
                 "reps_or_duration": "10-12",
                 "rest_seconds": 60,
-                "notes": "Focus on controlled eccentric (lowering) phase."
+                "notes": "Controlled movement, focus on chest contraction."
             },
             {
-                "name": "Dumbbell Bent-Over Rows",
+                "name": "Dumbbell Bicep Curls",
                 "sets": 3,
-                "reps_or_duration": "10-12",
-                "rest_seconds": 60,
-                "notes": "Focus on squeezing shoulder blades together."
-            },
-            {
-                "name": "Dumbbell Overhead Press (Seated)",
-                "sets": 3,
-                "reps_or_duration": "10-12",
-                "rest_seconds": 60,
-                "notes": "Keep core tight to avoid arching the back."
-            },
-            {
-                "name": "Glute Bridges",
-                "sets": 3,
-                "reps_or_duration": "15",
+                "reps_or_duration": "12-15",
                 "rest_seconds": 45,
-                "notes": "Hold the top position for 2 seconds."
+                "notes": "Keep elbows tucked to sides."
             },
             {
-                "name": "Yoga Flow: Seated Forward Fold & Spinal Twist",
-                "sets": 1,
-                "reps_or_duration": "10 mins",
-                "rest_seconds": 0,
-                "notes": "Focus on deep breathing and gentle stretching."
+                "name": "Dumbbell Overhead Tricep Extension (seated)",
+                "sets": 3,
+                "reps_or_duration": "12-15",
+                "rest_seconds": 45,
+                "notes": "Keep elbows close to ears."
+            },
+            {
+                "name": "Side-Lying Leg Lifts",
+                "sets": 3,
+                "reps_or_duration": "15 per side",
+                "rest_seconds": 30,
+                "notes": "Keep leg straight, target outer hip."
+            },
+            {
+                "name": "Bird-Dog",
+                "sets": 3,
+                "reps_or_duration": "10 per side",
+                "rest_seconds": 30,
+                "notes": "Focus on core stability and balance."
             }
         ]
     },
     {
-        "day": 5,
+        "date": "2025-07-15",
+        "day_label": "Tuesday",
         "focus": "Rest Day",
         "exercises": []
     },
     {
-        "day": 6,
+        "date": "2025-07-16",
+        "day_label": "Wednesday",
         "focus": "Rest Day",
         "exercises": []
     },
     {
-        "day": 7,
+        "date": "2025-07-17",
+        "day_label": "Thursday",
         "focus": "Rest Day",
         "exercises": []
     }
