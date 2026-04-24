@@ -23,14 +23,54 @@ const physiques = [
   "Lose Weight", "Build Muscle", "Get Toned", "Increase Flexibility", "Improve Endurance", "General Fitness"
 ];
 
+// ─── Helpers: map AI service response → PlanFeedback shape ───────────────────
+
+function mapMealPlan(raw: any[]) {
+  return (raw ?? []).map((day: any, _: number) => ({
+    date: day.date,
+    dayLabel: day.day_label ?? day.dayLabel,
+    totalDailyCalories: day.total_daily_calories ?? day.totalDailyCalories ?? 0,
+    totalDailyProtein: day.total_daily_protein ?? day.totalDailyProtein ?? 0,
+    meals: (day.meals ?? []).map((m: any, idx: number) => ({
+      title: m.name ?? m.title,
+      scheduledTime: m.scheduled_time ?? m.scheduledTime,
+      ingredients: m.ingredients ?? [],
+      calories: m.calories ?? 0,
+      protein: m.protein ?? 0,
+      done: false,
+      missed: false,
+      order: idx,
+    })),
+  }));
+}
+
+function mapExercisePlan(raw: any[]) {
+  return (raw ?? []).map((day: any) => ({
+    date: day.date,
+    dayLabel: day.day_label ?? day.dayLabel,
+    focus: day.focus ?? "",
+    isRestDay: (day.exercises ?? []).length === 0,
+    exercises: (day.exercises ?? []).map((ex: any, idx: number) => ({
+      title: ex.name ?? ex.title,
+      scheduledTime: ex.scheduled_time ?? ex.scheduledTime,
+      sets: ex.sets ?? 1,
+      repsOrDuration: ex.reps_or_duration ?? ex.repsOrDuration ?? "",
+      restSeconds: ex.rest_seconds ?? ex.restSeconds ?? 60,
+      notes: ex.notes ?? "",
+      done: false,
+      missed: false,
+      order: idx,
+    })),
+  }));
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 const AddGoal = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
-  
-  // --- ADDED STATES ---
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
-  // --------------------
 
   const [form, setForm] = useState({
     type: "",
@@ -107,7 +147,7 @@ const AddGoal = () => {
                 <Input
                   id="goal-title"
                   value={form.title}
-                  onChange={(event) => setForm((f) => ({ ...f, title: event.target.value }))}
+                  onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                   placeholder="E.g. Build strength in 12 weeks"
                 />
               </div>
@@ -119,7 +159,7 @@ const AddGoal = () => {
                   min={7}
                   max={365}
                   value={form.duration}
-                  onChange={(event) => setForm((f) => ({ ...f, duration: event.target.value }))}
+                  onChange={(e) => setForm((f) => ({ ...f, duration: e.target.value }))}
                 />
               </div>
             </div>
@@ -189,7 +229,7 @@ const AddGoal = () => {
                 <Input
                   id="diet-preference"
                   value={form.dietPreference}
-                  onChange={(event) => setForm((f) => ({ ...f, dietPreference: event.target.value }))}
+                  onChange={(e) => setForm((f) => ({ ...f, dietPreference: e.target.value }))}
                   placeholder="E.g. Vegetarian, Low carb, No preference"
                 />
               </div>
@@ -198,7 +238,7 @@ const AddGoal = () => {
                 <Textarea
                   id="goal-notes"
                   value={form.notes}
-                  onChange={(event) => setForm((f) => ({ ...f, notes: event.target.value }))}
+                  onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
                   placeholder="Any injuries, schedule constraints, or focus areas"
                   rows={5}
                 />
@@ -229,20 +269,20 @@ const AddGoal = () => {
         return;
       }
 
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      
+      const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
       // Step 1: Get user profile
       const profileRes = await axios.get(`${API_BASE_URL}/user/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       const user = profileRes.data.user;
       if (!user || !user._id) {
         setError("Failed to load user profile. Please try again.");
         return;
       }
 
-      // Step 2: Prepare goal payload
+      // Step 2: Call the generate-only endpoint (does NOT save to DB)
       const payload = {
         userId: user._id,
         title: form.title,
@@ -251,39 +291,55 @@ const AddGoal = () => {
         durationDays: parseInt(form.duration) || 30,
         medicalConditions: form.medicalConditions,
         dietPreference: form.dietPreference || "No preference",
-        notes: form.notes || ""
+        notes: form.notes || "",
       };
-      console.log("Submitting Goal Payload:", payload);
-      // Step 3: Create goal with AI
+
+      console.log("[AddGoal] Generating plan (no save yet):", payload);
+
       const response = await axios.post(
-        `${API_BASE_URL}/goals/create-with-ai`,
+        `${API_BASE_URL}/goals/generate-preview`,
         payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
-      if (response.status === 201 || response.status === 200) {
-        console.log("Goal created successfully!", response.data);
-        // Redirect to dashboard with success
-        setTimeout(() => navigate("/dashboard"), 500);
-      } else {
-        setError(response.data?.message || "Failed to create goal.");
-      }
+      const data = response.data;
+      console.log("[AddGoal] Preview received:", data);
 
+      // Step 3: Redirect to feedback page with plan data in router state
+      //         Nothing is saved to MongoDB yet — that happens only after approval.
+      navigate("/feedback", {
+        state: {
+          threadId: data.threadId,
+          userId: user._id,
+          mealPlan: mapMealPlan(data.meal_plan),
+          exercisePlan: mapExercisePlan(data.workout_plan),
+          groceryList: data.grocery_list ?? [],
+          equipmentNeeded: data.equipment_needed ?? [],
+          // Pass original form data so the confirm endpoint knows the goal metadata
+          userParams: {
+            title: form.title,
+            fitnessGoals: [form.type],
+            physiqueTarget: form.physique,
+            medicalConditions: form.medicalConditions,
+            dietPreference: form.dietPreference || undefined,
+            notes: form.notes || undefined,
+            durationDays: parseInt(form.duration) || 30,
+          },
+        },
+      });
     } catch (err: any) {
       console.error("Submission Error:", err);
-      
-      // Handle different error scenarios
       if (err.response?.status === 401) {
         setError("Session expired. Please log in again.");
         setTimeout(() => navigate("/login"), 1500);
       } else if (err.response?.status === 404) {
         setError("User profile not found. Please update your profile first.");
-      } else if (err.response?.status === 500) {
+      } else if (err.response?.status === 503) {
         setError("AI service is currently unavailable. Please try again later.");
       } else {
         setError(err.response?.data?.message || err.message || "Something went wrong. Please try again.");
@@ -293,22 +349,23 @@ const AddGoal = () => {
     }
   };
 
-  // ... (renderStep remains the same)
-
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-lg mx-auto px-4 h-16 flex items-center">
-          <button 
+          <button
             disabled={isGenerating}
-            onClick={() => (step > 0 ? setStep(step - 1) : navigate("/dashboard"))} 
+            onClick={() => (step > 0 ? setStep(step - 1) : navigate("/dashboard"))}
             className="text-muted-foreground hover:text-foreground disabled:opacity-50"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1 flex justify-center gap-1.5">
             {Array.from({ length: totalSteps }).map((_, i) => (
-              <div key={i} className={`h-1.5 rounded-full transition-all ${i <= step ? "w-8 bg-primary" : "w-4 bg-secondary"}`} />
+              <div
+                key={i}
+                className={`h-1.5 rounded-full transition-all ${i <= step ? "w-8 bg-primary" : "w-4 bg-secondary"}`}
+              />
             ))}
           </div>
           <div className="w-5" />
@@ -352,12 +409,12 @@ const AddGoal = () => {
               {isGenerating ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating AI Plan
+                  Generating AI Plan…
                 </>
               ) : (
                 <>
                   <Check className="w-4 h-4" />
-                  Create Goal
+                  Generate Plan
                 </>
               )}
             </Button>
