@@ -111,7 +111,77 @@ export const signupUser = async (req: Request, res: Response) => {
 
 // ================= GOOGLE LOGIN =================
 
+export const googleSignUp = async (req: Request, res: Response) => {
+  const { token } = req.body;
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+
+  if (!googleClientId) {
+    return res.status(500).json({ message: "Google client ID not configured" });
+  }
+
+  try {
+    const client = new OAuth2Client(googleClientId);
+
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: googleClientId,
+    });
+
+    const payload = ticket.getPayload();
+
+    if (!payload || !payload.email) {
+      return res.status(400).json({ message: "Invalid Google token" });
+    }
+
+    const { email, name, picture, sub: googleId } = payload;
+
+    // Check if user already exists
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // STRICT SIGN-UP: If they exist, reject the sign-up attempt.
+      return res.status(409).json({ 
+        message: "An account with this email already exists. Please log in instead." 
+      });
+    }
+
+    // Create the new user
+    user = new User({
+      email,
+      name,
+      image: picture,
+      googleId,
+      memberSince: new Date(),
+      streak: 0,
+      age: undefined,
+      heightCm: undefined,
+      weightKg: undefined,
+      level: "beginner",
+      medicalIssues: [],
+    });
+
+    await user.save();
+
+    const appToken = generateToken(user._id);
+    setTokenCookie(res, appToken);
+
+    res.status(201).json({
+      message: "Account created successfully",
+      token: appToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+      },
+    });
+
+  } catch (error) {
+    console.error("Google Sign-Up Error:", error);
+    res.status(401).json({ message: "Authentication failed during sign-up" });
+  }
+};
 export const googleLogin = async (req: Request, res: Response) => {
+  // ... (setup and token verification remains the same) ...
   const { token } = req.body;
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
 
@@ -138,18 +208,14 @@ export const googleLogin = async (req: Request, res: Response) => {
     let user = await User.findOne({ email });
 
     if (!user) {
-      user = new User({
-        email,
-        name,
-        image: picture,
-        googleId,
-        memberSince: new Date(),
-        streak: 0,
-        totalTasksDone: 0,
+      // STRICT LOGIN: If they don't exist, reject the login attempt.
+      return res.status(404).json({ 
+        message: "Account not found. Please sign up first." 
       });
-
-      await user.save();
-    } else if (!user.googleId) {
+    } 
+    
+    // If they signed up with email/password previously, link their Google ID now
+    if (!user.googleId) {
       user.googleId = googleId;
       await user.save();
     }
@@ -165,8 +231,10 @@ export const googleLogin = async (req: Request, res: Response) => {
         name: user.name,
       },
     });
+  }
 
-  } catch (error) {
+  // ... (catch block remains the same) ...
+catch (error) {
     console.error("Google Auth Error:", error);
     res.status(401).json({ message: "Authentication failed" });
   }

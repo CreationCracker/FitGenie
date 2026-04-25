@@ -7,7 +7,6 @@ import {
   generateGoalPreview,   // Step 1 — generate plan, no DB write
   confirmAndSaveGoal,    // Step 2 — user approved → notify Python + save to MongoDB
   regenerateGoalPlan,    // Step 2b — user gave feedback → proxy to Python → return new plan
-  createGoalWithAI,      // legacy one-shot (kept for backward compat)
   getUserGoals,
   getGoal,
   toggleTaskStatus,
@@ -26,8 +25,7 @@ router.post("/confirm", requireAuth, confirmAndSaveGoal);
 /** Step 2b — User gave feedback → Express proxies to Python → returns new plan (no DB write) */
 router.post("/regenerate", requireAuth, regenerateGoalPlan);
 
-// ── Legacy one-shot (keep so old integrations don't break) ───────────────────
-router.post("/create-with-ai", requireAuth, createGoalWithAI);
+
 
 // ── Existing routes ───────────────────────────────────────────────────────────
 router.get("/", requireAuth, getUserGoals);

@@ -116,7 +116,7 @@ export type PhysiqueTarget =
 export type GoalStatus = "active" | "completed" | "abandoned";
 
 export interface IGoal extends Document {
-  userId: Types.ObjectId;
+  // userId: Types.ObjectId;
   title: string;
   fitnessGoals: GoalType[];
   physiqueTarget: PhysiqueTarget;
@@ -141,12 +141,7 @@ export interface IGoal extends Document {
 
 const GoalSchema = new Schema<IGoal>(
   {
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      index: true,
-    },
+    
     title: { type: String, required: true, trim: true },
     fitnessGoals: [
       {
