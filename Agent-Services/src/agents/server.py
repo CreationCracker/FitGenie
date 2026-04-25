@@ -265,6 +265,8 @@ def submit_feedback(thread_id):
 # ROUTE 3: Poll Current Plan State
 # GET /api/plans/status/<user_id>
 # ==========================================
+
+
 @app.route("/api/plans/status/<user_id>", methods=["GET"])
 def get_plan_status(user_id):
     """
@@ -323,6 +325,24 @@ def health():
 # ==========================================
 # ENTRY POINT
 # ==========================================
+@app.route("/chat-reply", methods=["POST"])
+def chat_reply():
+    """
+    Chat endpoint - receives a message and returns a dummy response.
+    Will be replaced with a dedicated chat service later.
+    """
+    body = request.get_json(force=True)
+    user_message = body.get("message", "")
+
+    if not user_message:
+        return jsonify({"error": "message field is required"}), 400
+
+    print(f"\n[Chat] Received message: {user_message}")
+    
+    # For now, just return a dummy response
+    ai_response = f"Thanks for your message: {user_message}. Chat service coming soon!"
+
+    return jsonify({"message": ai_response}), 200
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8003))
     print(f"\n[Server] FitGenie Agent API running on http://localhost:{port}")

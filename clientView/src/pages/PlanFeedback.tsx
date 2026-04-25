@@ -49,6 +49,11 @@ interface Exercise {
   repsOrDuration: string;
   restSeconds: number;
   notes?: string;
+  tutorialVideoId: string;
+  tutorialUrl: string;
+  tutorialThumbnail: string;
+  tutorialTitle: string;
+  tutorialChannelName: string;
 }
 
 interface ExerciseDay {
@@ -393,25 +398,30 @@ const PlanFeedback = () => {
     }));
   }
 
-  function mapExercisePlan(raw: any[]): ExerciseDay[] {
-    return (raw ?? []).map((day: any) => ({
-      date: day.date,
-      dayLabel: day.day_label ?? day.dayLabel,
-      focus: day.focus ?? "",
-      isRestDay: (day.exercises ?? []).length === 0,
-      exercises: (day.exercises ?? []).map((ex: any, idx: number) => ({
-        title: ex.name ?? ex.title,
-        scheduledTime: ex.scheduled_time ?? ex.scheduledTime,
-        sets: ex.sets ?? 1,
-        repsOrDuration: ex.reps_or_duration ?? ex.repsOrDuration ?? "",
-        restSeconds: ex.rest_seconds ?? ex.restSeconds ?? 60,
-        notes: ex.notes ?? "",
-        done: false,
-        missed: false,
-        order: idx,
-      })),
-    }));
-  }
+ function mapExercisePlan(raw: any[]): ExerciseDay[] {
+  return (raw ?? []).map((day: any) => ({
+    date: day.date,
+    dayLabel: day.day_label ?? day.dayLabel,
+    focus: day.focus ?? "",
+    isRestDay: (day.exercises ?? []).length === 0,
+    exercises: (day.exercises ?? []).map((ex: any, idx: number) => ({
+      title: ex.name ?? ex.title,
+      scheduledTime: ex.scheduled_time ?? ex.scheduledTime,
+      sets: ex.sets ?? 1,
+      repsOrDuration: ex.reps_or_duration ?? ex.repsOrDuration ?? "",
+      restSeconds: ex.rest_seconds ?? ex.restSeconds ?? 60,
+      notes: ex.notes ?? "",
+      done: false,
+      missed: false,
+      order: idx,
+      tutorialVideoId:     ex.tutorialVideoId     ?? "",
+      tutorialUrl:         ex.tutorialUrl         ?? "",
+      tutorialThumbnail:   ex.tutorialThumbnail   ?? "",
+      tutorialTitle:       ex.tutorialTitle       ?? "",
+      tutorialChannelName: ex.tutorialChannelName ?? "",
+    })),
+  }));
+}
 
   // ── Loading states ──────────────────────────────────────────────────────────
   if (phase === "generating" || phase === "saving") {

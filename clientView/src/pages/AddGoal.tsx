@@ -60,6 +60,11 @@ function mapExercisePlan(raw: any[]) {
       done: false,
       missed: false,
       order: idx,
+      tutorialVideoId:  ex.tutorialVideoId ?? "",
+      tutorialUrl: ex.tutorialUrl ?? "",
+      tutorialThumbnail: ex.tutorialThumbnail ?? "",
+      tutorialTitle: ex.tutorialTitle ?? "",
+      tutorialChannelName: ex.tutorialChannelName ?? "",
     })),
   }));
 }

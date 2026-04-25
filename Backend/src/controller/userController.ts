@@ -273,15 +273,26 @@ export const getMyGoals = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
 
-    // ✅ Fetch all goals of user (NO tasks for performance)
-    const goals = await Goal.find({ userId })
-      .select("-tasks")
-      .sort({ createdAt: -1 });
+    // Fetch the user and populate the goals, applying your performance filters
+    const user = await User.findById(userId)
+      .populate({
+        path: "currentGoalId",
+        select: "-tasks" // Keeps your performance optimization
+      })
+      .populate({
+        path: "pastGoals",
+        select: "-tasks",
+        options: { sort: { createdAt: -1 } } // Keeps your sorting logic
+      });
 
-    const activeGoals = goals.filter(g => g.status === "active");
-    const pastGoals = goals.filter(
-      g => g.status === "completed" || g.status === "abandoned"
-    );
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Wrap the single currentGoalId in an array so your frontend doesn't break
+    // if it's currently mapping over `activeGoals`
+    const activeGoals = user.currentGoalId ? [user.currentGoalId] : [];
+    const pastGoals = user.pastGoals || [];
 
     res.status(200).json({
       activeGoals,

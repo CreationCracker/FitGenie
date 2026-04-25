@@ -7,7 +7,7 @@ import {
   generateGoalPreview,   // Step 1 — generate plan, no DB write
   confirmAndSaveGoal,    // Step 2 — user approved → notify Python + save to MongoDB
   regenerateGoalPlan,    // Step 2b — user gave feedback → proxy to Python → return new plan
-  getUserGoals,
+  // getUserGoals,
   getGoal,
   toggleTaskStatus,
 } from "../controller/goalController.js";
@@ -28,7 +28,7 @@ router.post("/regenerate", requireAuth, regenerateGoalPlan);
 
 
 // ── Existing routes ───────────────────────────────────────────────────────────
-router.get("/", requireAuth, getUserGoals);
+// router.get("/", requireAuth, getUserGoals);
 router.get("/:goalId", requireAuth, getGoal);
 router.patch("/:goalId/tasks/:taskId/toggle", requireAuth, toggleTaskStatus);
 

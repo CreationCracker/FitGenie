@@ -1,10 +1,6 @@
 import axios from "axios";
-
-// ✅ VERY IMPORTANT (for cookies auth)
-axios.defaults.withCredentials = true;
-
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,9 +15,27 @@ import BuyItems from "./pages/BuyItems";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Onboarding from "./pages/OnBoarding";
-// import FeedbackPage from "./pages/PlanFeedback";
+import AIAssistant from "./pages/AiAssistant";
 import PlanFeedback from "./pages/PlanFeedback";
+
+// ✅ VERY IMPORTANT (for cookies auth)
+axios.defaults.withCredentials = true;
+
 const queryClient = new QueryClient();
+
+// 🔥 THIS COMPONENT HANDLES THE HIDING LOGIC
+const ConditionalAI = () => {
+  const location = useLocation();
+  
+  // Define routes where the AI should NOT appear
+  const excludedPaths = ["/login", "/signup"];
+  
+  if (excludedPaths.includes(location.pathname)) {
+    return null;
+  }
+
+  return <AIAssistant />;
+};
 
 const App = () => (
   <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
@@ -43,6 +57,10 @@ const App = () => (
             <Route path="/feedback" element={<PlanFeedback />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          
+          {/* Use the conditional wrapper instead of the raw component */}
+          <ConditionalAI />
+          
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
