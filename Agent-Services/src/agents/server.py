@@ -124,13 +124,13 @@ def generate_plans():
     """
     body = request.get_json(force=True)
 
-    user_id = body.get("userId")
-    if not user_id:
-        return jsonify({"error": "userId is required"}), 400
+    thread_id = body.get("threadId")
+    if not thread_id:
+        return jsonify({"error": "threadId is required"}), 400
 
     # One thread per user — reused across regenerations for the same session.
     # If you want per-plan isolation, append a counter: f"{user_id}_{counter}"
-    thread_id = str(user_id)
+    # thread_id = str(user_id)
     config    = {"configurable": {"thread_id": thread_id}}
 
     graph_state = build_graph_state(body)
@@ -148,7 +148,7 @@ def generate_plans():
 
         return jsonify({
             "status":           "awaiting_feedback",
-            "userId":           user_id,
+            # "userId":           user_id,
             "threadId":         thread_id,
             **plan,
         }), 200
@@ -160,10 +160,10 @@ def generate_plans():
 
 # ==========================================
 # ROUTE 2: Submit Feedback or Approve
-# POST /api/plans/feedback/<user_id>
+# POST /api/plans/feedback/<thread_id>
 # ==========================================
-@app.route("/api/plans/feedback/<user_id>", methods=["POST"])
-def submit_feedback(user_id):
+@app.route("/api/plans/feedback/<thread_id>", methods=["POST"])
+def submit_feedback(thread_id):
     """
     Two sub-cases:
 
@@ -194,7 +194,7 @@ def submit_feedback(user_id):
     }
     """
     body      = request.get_json(force=True)
-    thread_id = str(user_id)
+    thread_id = str(thread_id)
     config    = {"configurable": {"thread_id": thread_id}}
 
     try:
@@ -213,7 +213,7 @@ def submit_feedback(user_id):
             return jsonify({
                 "status":  "approved",
                 "message": "Plan approved. Saving to database.",
-                "userId":  user_id,
+                # "userId":  user_id,
             }), 200
 
         # ── Case B: User wants changes ───────────────────────────────────────
@@ -252,7 +252,7 @@ def submit_feedback(user_id):
         return jsonify({
             "status":           "awaiting_feedback",
             "message":          "Plans regenerated with your feedback.",
-            "userId":           user_id,
+            # "userId":           user_id,
             **plan,
         }), 200
 

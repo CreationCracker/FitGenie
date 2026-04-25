@@ -15,7 +15,7 @@ export interface IUser extends Document {
   medicalIssues?: string[]; 
   memberSince: Date;
   streak: number;
-  totalTasksDone: number;
+  // totalTasksDone: number;
   currentGoalId?: Types.ObjectId;
   pastGoals: Types.ObjectId[];
   
@@ -46,7 +46,7 @@ const UserSchema = new Schema<IUser>(
     medicalIssues: [{ type: String, trim: true }], 
     memberSince: { type: Date, default: Date.now },
     streak: { type: Number, default: 0 },
-    totalTasksDone: { type: Number, default: 0 },
+    // totalTasksDone: { type: Number, default: 0 },
     currentGoalId: { type: Schema.Types.ObjectId, ref: "Goal" },
     pastGoals: [{ type: Schema.Types.ObjectId, ref: "Goal" }],
   },

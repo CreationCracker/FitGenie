@@ -48,7 +48,7 @@ const Login = () => {
     setIsLoading(true);
     setError("");
     try {
-      const res = await axios.post(`${API_BASE_URL}/user/auth/google`, {
+      const res = await axios.post(`${API_BASE_URL}/user/auth/google/login`, {
         token: credentialResponse.credential,
       }, { withCredentials: true });
       

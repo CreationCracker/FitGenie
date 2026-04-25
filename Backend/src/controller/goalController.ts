@@ -57,95 +57,7 @@ interface UserGoalParams {
   durationDays: number;
 }
 
-// ─── Internal helper: parse AI raw JSON and map to Mongoose subdocs ───────────
 
-export const processAndSaveAIGoal = async (
-  userId: string,
-  rawText: string,
-  userParams: UserGoalParams
-): Promise<IGoal> => {
-  let aiData: AIResponse;
-  try {
-    const cleaned = rawText.replace(/```json|```/g, "").trim();
-    aiData = JSON.parse(cleaned);
-  } catch (err) {
-    throw new Error(`Failed to parse AI response as JSON: ${err}`);
-  }
-
-  const mealPlan: IMealDay[] = (aiData.meal_plan ?? []).map((day) => ({
-    date: day.date,
-    dayLabel: day.day_label,
-    totalDailyCalories: day.total_daily_calories ?? 0,
-    totalDailyProtein: day.total_daily_protein ?? 0,
-    meals: (day.meals ?? []).map((meal, idx) => ({
-      title: meal.name,
-      scheduledTime: meal.scheduled_time,
-      done: false,
-      missed: false,
-      order: idx,
-      ingredients: meal.ingredients ?? [],
-      calories: meal.calories ?? 0,
-      protein: meal.protein ?? 0,
-    })),
-  }));
-
-  const exercisePlan: IExerciseDay[] = (aiData.workout_plan ?? []).map((day) => ({
-    date: day.date,
-    dayLabel: day.day_label,
-    focus: day.focus ?? "",
-    isRestDay: (day.exercises ?? []).length === 0,
-    exercises: (day.exercises ?? []).map((ex, idx) => ({
-      title: ex.name,
-      scheduledTime: ex.scheduled_time,
-      done: false,
-      missed: false,
-      order: idx,
-      sets: ex.sets ?? 1,
-      repsOrDuration: ex.reps_or_duration ?? "",
-      restSeconds: ex.rest_seconds ?? 60,
-      notes: ex.notes ?? "",
-    })),
-  }));
-
-const allDates = [
-  ...(mealPlan).map((d) => d.date),
-  ...(exercisePlan).map((d) => d.date),
-].filter((d): d is string => Boolean(d)).sort();
-
-const firstDate = allDates.length > 0 ? allDates[0] : undefined;
-const lastDate  = allDates.length > 0 ? allDates[allDates.length - 1] : undefined;
-
-const startDate = firstDate ? new Date(firstDate) : new Date();
-const endDate   = lastDate  ? new Date(lastDate)  : new Date();
-
-const durationDays =
-  Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-
-  const goal = new Goal({
-    userId: new Types.ObjectId(userId),
-    title: userParams.title,
-    fitnessGoals: userParams.fitnessGoals,
-    physiqueTarget: userParams.physiqueTarget,
-    medicalConditions: userParams.medicalConditions ?? [],
-    dietPreference: userParams.dietPreference,
-    notes: userParams.notes,
-    durationDays,
-    startDate,
-    endDate,
-    groceryList: aiData.grocery_list ?? [],
-    equipmentNeeded: aiData.equipment_needed ?? [],
-    mealPlan,
-    exercisePlan,
-    progress: 0,
-    isActive: true,
-    status: "active",
-  });
-
-  await goal.save();
-  return goal;
-};
-
-// ─── Helper: save a plan from already-mapped frontend data (after approval) ───
 
 const saveConfirmedGoal = async (
   userId: string,
@@ -187,22 +99,22 @@ const saveConfirmedGoal = async (
     })),
   }));
 
-const allDates = [
-  ...(mealPlan).map((d) => d.date),
-  ...(exercisePlan).map((d) => d.date),
-].filter((d): d is string => Boolean(d)).sort();
+  const allDates = [
+    ...(mealPlan).map((d) => d.date),
+    ...(exercisePlan).map((d) => d.date),
+  ].filter((d): d is string => Boolean(d)).sort();
 
-const firstDate = allDates.length > 0 ? allDates[0] : undefined;
-const lastDate  = allDates.length > 0 ? allDates[allDates.length - 1] : undefined;
+  const firstDate = allDates.length > 0 ? allDates[0] : undefined;
+  const lastDate  = allDates.length > 0 ? allDates[allDates.length - 1] : undefined;
 
-const startDate = firstDate ? new Date(firstDate) : new Date();
-const endDate   = lastDate  ? new Date(lastDate)  : new Date();
+  const startDate = firstDate ? new Date(firstDate) : new Date();
+  const endDate   = lastDate  ? new Date(lastDate)  : new Date();
 
-const durationDays =
-  Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  const durationDays =
+    Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
   const goal = new Goal({
-    userId: new Types.ObjectId(userId),
+    // userId: new Types.ObjectId(userId),
     title: body.title,
     fitnessGoals: Array.isArray(body.fitnessGoals) ? body.fitnessGoals : [body.fitnessGoals],
     physiqueTarget: body.physiqueTarget,
@@ -221,7 +133,31 @@ const durationDays =
     status: "active",
   });
 
+  // 1. Save the newly created goal
   await goal.save();
+
+  // 2. Update the User document with current/past goals
+  const user = await User.findById(userId);
+  if (user) {
+    // If the user already has a current goal, move it to pastGoals
+    if (user.currentGoalId) {
+      // Ensure pastGoals array is initialized
+      if (!user.pastGoals) {
+        user.pastGoals = [];
+      }
+      
+      // Push the old current goal ID into pastGoals 
+      // (Checking to prevent duplicate entries if retries happen)
+      if (!user.pastGoals.includes(user.currentGoalId)) {
+        user.pastGoals.push(user.currentGoalId);
+      }
+    }
+
+    // Assign the new goal as the current goal
+    user.currentGoalId = goal._id as Types.ObjectId;
+    await user.save();
+  }
+
   return goal;
 };
 
@@ -263,9 +199,10 @@ export const generateGoalPreview = async (req: Request, res: Response): Promise<
     }
 
     const formattedStartDate = new Date().toISOString().split("T")[0];
-
+    const planCount=user.planCount
+    const threadId=userId +  "_" + planCount; // Unique thread ID for this generation session
     const aiPayload = {
-      userId,
+      threadId,
       title,
       notes: notes ?? "",
       type,
@@ -302,7 +239,8 @@ export const generateGoalPreview = async (req: Request, res: Response): Promise<
 
     // Return the raw AI plan to the frontend — nothing saved yet
     res.status(200).json({
-      threadId: userId,
+      userId: userId,
+      threadId: threadId,
       meal_plan: (aiData as AIResponse).meal_plan ?? [],
       workout_plan: (aiData as AIResponse).workout_plan ?? [],
       grocery_list: (aiData as AIResponse).grocery_list ?? [],
@@ -348,12 +286,12 @@ export const confirmAndSaveGoal = async (req: Request, res: Response): Promise<v
       res.status(404).json({ error: "User not found" });
       return;
     }
-
+   
     // Step 1: Tell Python AI service the user is satisfied — closes the HITL loop
     const aiServiceUrl = process.env.AI_SERVICE_URL || "http://localhost:8003";
     console.log(`[confirmAndSaveGoal] Notifying Python AI service — thread: ${threadId}`);
     try {
-      await fetch(`${aiServiceUrl}/api/plans/feedback/${userId}/1`, {
+      await fetch(`${aiServiceUrl}/api/plans/feedback/${threadId}/1`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is_satisfied: true }),
@@ -394,17 +332,17 @@ export const confirmAndSaveGoal = async (req: Request, res: Response): Promise<v
  */
 export const regenerateGoalPlan = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId, threadId, mealFeedback, exerciseFeedback } = req.body;
+    const { userId,threadId, mealFeedback, exerciseFeedback } = req.body;
 
-    if (!userId) {
-      res.status(400).json({ error: "userId is required" });
+    if (!threadId) {
+      res.status(400).json({ error: "threadId is required" });
       return;
     }
 
     const aiServiceUrl = process.env.AI_SERVICE_URL || "http://localhost:8003";
-    console.log(`[regenerateGoalPlan] Sending feedback to Python AI — thread: ${threadId}, user: ${userId}`);
+    console.log(`[regenerateGoalPlan] Sending feedback to Python AI — thread: ${threadId}`);
 
-    const aiResponse = await fetch(`${aiServiceUrl}/api/plans/feedback/${userId}`, {
+    const aiResponse = await fetch(`${aiServiceUrl}/api/plans/feedback/${threadId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -425,6 +363,8 @@ export const regenerateGoalPlan = async (req: Request, res: Response): Promise<v
 
     // Return the new plan to the frontend — still NOT saved to MongoDB
     res.status(200).json({
+      userId: userId,
+      threadId: threadId,
       meal_plan: ( aiData as AIResponse).meal_plan ?? [],
       workout_plan: ( aiData as AIResponse).workout_plan ?? [],
       grocery_list: ( aiData as AIResponse).grocery_list ?? [],
@@ -440,95 +380,9 @@ export const regenerateGoalPlan = async (req: Request, res: Response): Promise<v
   }
 };
 
-/**
- * POST /goals/create-with-ai   (legacy — kept for backward compat)
- *
- * Original one-shot endpoint: generates AND saves in one call.
- * Prefer the generate-preview + confirm two-step flow for new UI.
- */
-export const createGoalWithAI = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const {
-      userId,
-      title,
-      type,
-      physiqueTarget,
-      durationDays,
-      medicalConditions,
-      dietPreference,
-      notes,
-    } = req.body;
 
-    if (!userId || !title || !type || !physiqueTarget || !durationDays) {
-      res.status(400).json({ error: "Missing required fields" });
-      return;
-    }
 
-    const user: IUser | null = await User.findById(userId);
-    if (!user) {
-      res.status(404).json({ error: "User not found" });
-      return;
-    }
 
-    const formattedStartDate = new Date().toISOString().split("T")[0];
-
-    const aiPayload = {
-      userId,
-      title,
-      notes: notes ?? "",
-      type,
-      physiqueTarget,
-      durationDays: Number(durationDays) || 7,
-      medicalConditions: medicalConditions || user?.medicalIssues || [],
-      dietPreference: dietPreference ? [dietPreference] : [],
-      start_date: formattedStartDate,
-      target_calories: 2000,
-      target_protein: 150,
-      days_per_week: Math.min(Number(durationDays), 4),
-      fitness_level: user?.level || "Beginner",
-      available_equipment: [],
-    };
-
-    const aiServiceUrl = process.env.AI_SERVICE_URL || "http://localhost:8003";
-    const aiResponse = await fetch(`${aiServiceUrl}/api/plans/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(aiPayload),
-    });
-
-    if (!aiResponse.ok) {
-      const errorData = await aiResponse.text();
-      throw new Error(`AI Service failed: ${aiResponse.status} - ${errorData}`);
-    }
-
-    const rawText = await aiResponse.text();
-    const userParams: UserGoalParams = {
-      title,
-      fitnessGoals: Array.isArray(type) ? type : [type],
-      physiqueTarget,
-      medicalConditions: medicalConditions || user?.medicalIssues || [],
-      dietPreference: dietPreference ?? undefined,
-      notes: notes ?? undefined,
-      durationDays: Number(durationDays) || 7,
-    };
-
-    const finalGoal = await processAndSaveAIGoal(userId, rawText, userParams);
-
-    res.status(201).json({
-      message: "Goal successfully generated and saved!",
-      goalId: finalGoal._id,
-    });
-  } catch (error: any) {
-    console.error("Error creating AI goal:", error);
-    const status = error.message?.includes("AI Service") ? 503 : 500;
-    res.status(status).json({
-      error: status === 503 ? "AI service unavailable" : "Internal Server Error",
-      details: error.message,
-    });
-  }
-};
-
-// ─── Other existing controllers ───────────────────────────────────────────────
 
 export const getUserGoals = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
