@@ -1,6 +1,6 @@
 # Web Framework & Server
-fastapi
-uvicorn[standard]
+flask
+flask-cors
 pydantic
 
 # AI, Agents, & Graph Logic
@@ -8,7 +8,7 @@ langchain
 langchain-core
 langchain-google-genai
 langgraph
-
+langchain.tools
 # RAG / Vector Database (For rag_agent.py)
 langchain-community
 chromadb
@@ -18,8 +18,7 @@ tiktoken
 python-dotenv
 requests
 
-fastapi==0.115.0
-uvicorn[standard]==0.30.6
+
 langchain==0.3.0
 langchain-openai==0.2.0
 langgraph==0.2.28
@@ -28,3 +27,4 @@ pydantic-settings==2.5.2
 python-dotenv==1.0.1
 httpx==0.27.2
 openai==1.51.0
+youtubesearchpython
