@@ -305,6 +305,7 @@ const PlanFeedback = () => {
       const token = localStorage.getItem("token");
 
       // Single call to Express — it notifies Python AI service AND saves to MongoDB
+      console.log(plan)
       await axios.post(
         `${API_BASE_URL}/goals/confirm`,
         {
@@ -338,6 +339,7 @@ const PlanFeedback = () => {
       const token = localStorage.getItem("token");
 
       // Call Express backend — it proxies the feedback to Python and returns the new plan
+      
       const res = await axios.post(
         `${API_BASE_URL}/goals/regenerate`,
         {
