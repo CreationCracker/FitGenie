@@ -24,6 +24,11 @@ export interface IExerciseTask extends IBaseTask {
   repsOrDuration: string;
   restSeconds: number;
   notes?: string;
+  tutorialVideoId: string;
+tutorialUrl: string;
+tutorialThumbnail: string;
+tutorialTitle: string;
+tutorialChannelName: string;
 }
 
 const baseTaskFields = {
@@ -51,6 +56,11 @@ const ExerciseTaskSchema = new Schema<IExerciseTask>(
     repsOrDuration: { type: String, required: true },
     restSeconds: { type: Number, required: true },
     notes: { type: String, trim: true },
+    tutorialVideoId: { type: String },
+    tutorialUrl: { type: String },
+    tutorialThumbnail: { type: String },
+    tutorialTitle: { type: String },
+    tutorialChannelName: { type: String },
   },
   { _id: true }
 );

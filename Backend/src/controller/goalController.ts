@@ -31,6 +31,11 @@ interface AIExercise {
   reps_or_duration: string;
   rest_seconds: number;
   notes?: string;
+  tutorial_video_id: string;
+  tutorial_url: string;
+  tutorial_thumbnail: string;
+  tutorial_title: string;
+  tutorial_channel_name: string;
 }
 
 interface AIExerciseDay {
@@ -96,6 +101,11 @@ const saveConfirmedGoal = async (
       repsOrDuration: ex.repsOrDuration ?? "",
       restSeconds: ex.restSeconds ?? 60,
       notes: ex.notes ?? "",
+      tutorialVideoId: ex.tutorialVideoId ?? "",
+      tutorialUrl: ex.tutorialUrl ?? "",
+      tutorialThumbnail: ex.tutorialThumbnail ?? "",
+      tutorialTitle: ex.tutorialTitle ?? "",
+      tutorialChannelName: ex.tutorialChannelName ?? "",
     })),
   }));
 
@@ -132,7 +142,7 @@ const saveConfirmedGoal = async (
     isActive: true,
     status: "active",
   });
-
+  
   // 1. Save the newly created goal
   await goal.save();
 
@@ -236,6 +246,8 @@ export const generateGoalPreview = async (req: Request, res: Response): Promise<
     // The Python service returns JSON directly with meal_plan, workout_plan, etc.
     const aiData = await aiResponse.json();
     console.log("[generateGoalPreview] AI responded — returning preview to frontend");
+    
+   
 
     // Return the raw AI plan to the frontend — nothing saved yet
     res.status(200).json({
@@ -361,6 +373,8 @@ export const regenerateGoalPlan = async (req: Request, res: Response): Promise<v
     const aiData = await aiResponse.json();
     console.log("[regenerateGoalPlan] Regenerated plan received from Python");
 
+    // Log raw AI exercise data for debugging
+   
     // Return the new plan to the frontend — still NOT saved to MongoDB
     res.status(200).json({
       userId: userId,
@@ -380,23 +394,25 @@ export const regenerateGoalPlan = async (req: Request, res: Response): Promise<v
   }
 };
 
+// Adjust path if needed
 
 
 
 
-export const getUserGoals = async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-    const goals = await Goal.find({ userId }).sort({ createdAt: -1 });
-    res.status(200).json(goals);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch goals" });
-  }
-};
+
+// export const getUserGoals = async (req: AuthRequest, res: Response): Promise<void> => {
+//   try {
+//     const userId = req.user?.id;
+//     if (!userId) {
+//       res.status(401).json({ message: "Unauthorized" });
+//       return;
+//     }
+//     const goals = await Goal.find({ userId }).sort({ createdAt: -1 });
+//     res.status(200).json(goals);
+//   } catch (error) {
+//     res.status(500).json({ message: "Failed to fetch goals" });
+//   }
+// };
 
 export const toggleTaskStatus = async (req: AuthRequest, res: Response): Promise<void> => {
   const { goalId, taskId } = req.params;

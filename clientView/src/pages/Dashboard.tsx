@@ -15,7 +15,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
-
+// import AIAssistant from "./AiAssistant";
 interface Goal {
   _id: string;
   title: string;
@@ -257,6 +257,7 @@ const Dashboard = () => {
           </section>
         )}
       </main>
+      {/* <AIAssistant /> */}
     </div>
   );
 };
