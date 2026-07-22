@@ -84,7 +84,7 @@ const Profile = () => {
         .filter((issue) => issue.length > 0);
 
       const response = await axios.put(
-        `${API_BASE_URL}/update-profile`,
+        `${API_BASE_URL}/user/update-profile`,
         {
           name: formData.name, 
           age: formData.age ? parseInt(formData.age as string) : undefined,

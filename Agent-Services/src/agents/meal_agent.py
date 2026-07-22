@@ -1,5 +1,5 @@
-
 import os
+import sys
 from typing import List
 from datetime import datetime, timedelta
 from pydantic import BaseModel, Field
@@ -8,11 +8,18 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
 from state import MasterGraphState
 
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+from tools.youtube_recipe_tool import YoutubeRecipeTool
+
 load_dotenv()
+
+# ─── TOOL SETUP ───────────────────────────────────────────────────────────────
+youtube_recipe_tool = YoutubeRecipeTool()
 
 # --- PYDANTIC SCHEMAS ---
 class Meal(BaseModel):
     name: str = Field(description="Name of the meal or recipe")
+    scheduled_time: str = Field(description="Scheduled time for this meal in HH:MM format, e.g. '08:00'")
     ingredients: List[str] = Field(description="List of required ingredients with exact quantities")
     calories: int = Field(description="Estimated calories for this meal")
     protein: int = Field(description="Estimated protein in grams")
@@ -71,6 +78,21 @@ IMPORTANT DIETARY RESTRICTIONS (follow strictly):
 {user_context_str}
 """
 
+    # ── Preferred meal times ──────────────────────────────────────────────────
+    preferred_times = state.get("preferred_times") or {}
+    breakfast_time = preferred_times.get("breakfast", "08:00")
+    lunch_time = preferred_times.get("lunch", "13:00")
+    dinner_time = preferred_times.get("dinner", "20:00")
+    snack_time = preferred_times.get("snack", "16:00")
+
+    time_instructions = f"""
+- Meal Schedule (assign these as the scheduled_time for each meal):
+  * Breakfast: {breakfast_time}
+  * Lunch: {lunch_time}
+  * Snack: {snack_time}
+  * Dinner: {dinner_time}
+  Each meal MUST include a "scheduled_time" field with the appropriate time from above in HH:MM format."""
+
     system_prompt = f"""You are an expert sports nutritionist AI.
 Your task is to create a highly accurate, day-by-day meal plan.{privileged_instructions}
 Constraints:
@@ -80,6 +102,7 @@ Constraints:
 - Overall Fitness Goals: {targets_str if targets_str else "General fitness"}
 - Menu Regularity: Do NOT generate more than 12 unique meals/recipes across all days.
 - Grocery List: Consolidate all ingredients into a single master list.
+{time_instructions}
 
 IMPORTANT — use these exact dates and weekday labels in the plan (one entry per day):
 {schedule_str}
@@ -100,8 +123,50 @@ Please generate an updated meal plan incorporating these changes."""
         HumanMessage(content="Please generate the meal plan and grocery list.")
     ])
 
+    raw_plan: List[dict] = [dp.model_dump() for dp in response.plan]
+
+    # ── Step 2: Tool calls — fetch a YouTube recipe per unique meal ───────────
+    print("   [Meal Agent] Dispatching tool calls for YouTube recipes...")
+    seen: set[str] = set()
+    unique_meals: list[str] = []
+    for day in raw_plan:
+        for meal in day.get("meals", []):
+            key = meal["name"].strip().lower()
+            if key not in seen:
+                seen.add(key)
+                unique_meals.append(meal["name"].strip())
+
+    recipes: dict[str, dict] = {}
+    for name in unique_meals:
+        print(f"   [Meal Agent] Tool call → youtube_recipe_search('{name}')")
+        result = youtube_recipe_tool._run(name)
+        if "error" in result:
+            print(f"   [Meal Agent] ⚠ Recipe not found for '{name}': {result['error']}")
+            recipes[name.lower()] = {
+                "videoId": "", "url": "", "thumbnail": "", "title": "", "channel": ""
+            }
+        else:
+            recipes[name.lower()] = result
+
+    # ── Step 3: Merge recipe fields into every meal ───────────────────────────
+    for day in raw_plan:
+        enriched: list[dict] = []
+        for meal in day.get("meals", []):
+            rec = recipes.get(meal["name"].strip().lower(), {})
+            enriched.append({
+                **meal,
+                "recipeVideoId":     rec.get("videoId",   ""),
+                "recipeUrl":         rec.get("url",       ""),
+                "recipeThumbnail":   rec.get("thumbnail", ""),
+                "recipeTitle":       rec.get("title",     ""),
+                "recipeChannelName": rec.get("channel",   ""),
+            })
+        day["meals"] = enriched
+
+    print(f"   [Meal Agent] Enriched {len(unique_meals)} unique meals with recipe videos.")
+
     return {
-        "generated_meal_plan": [dp.model_dump() for dp in response.plan],
+        "generated_meal_plan": raw_plan,
         "grocery_list": response.grocery_list,
         "meal_feedback": None
     }

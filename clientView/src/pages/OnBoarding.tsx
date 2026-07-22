@@ -45,7 +45,7 @@ const Onboarding = () => {
         .filter((issue) => issue.length > 0);
 
       const response = await axios.put(
-        `${API_BASE_URL}/update-profile`, 
+        `${API_BASE_URL}/user/update-profile`, 
         {
           age: parseInt(age),
           heightCm: parseInt(heightCm),

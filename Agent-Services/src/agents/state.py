@@ -14,6 +14,7 @@ class MasterGraphState(TypedDict):
     # 2. TIMING & TRACKING STATE
     # ==========================================
     start_date: Optional[str]             # e.g., "2025-07-10" — plans begin from start_date + 1 day
+    preferred_times: Optional[dict]       # e.g., {"breakfast": "08:00", "lunch": "13:00", ...}
 
     # ==========================================
     # 3. MEAL PLANNER STATE

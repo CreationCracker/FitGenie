@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import { connectDB } from "./database.js";
 import userRoutes from "./routes/userRoutes.js";
 import goalRoutes from "./routes/goalRoutes.js";
-
+import chatRoute from "./routes/chatroute.js";
 // Configs
 const PORT = process.env.PORT || 3000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:8080";
@@ -30,6 +30,7 @@ app.use(cookieParser());
 // ✅ Routes
 app.use("/user", userRoutes);
 app.use("/goals", goalRoutes);
+app.use("/ai", chatRoute);
 
 // ✅ Global Error Handler
 const errorHandler = (

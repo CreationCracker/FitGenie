@@ -1,26 +1,129 @@
-
 import mongoose, { Schema, Document, Types } from "mongoose";
-export interface ITask {
-  _id?: Types.ObjectId; 
-  date: string;
+
+// ---------------------------------------------------------
+// 1. Base Task Fields (unchanged)
+// ---------------------------------------------------------
+
+export interface IBaseTask {
+  _id?: Types.ObjectId;
   title: string;
-  scheduledTime: string;
+  scheduledTime?: string;
   done: boolean;
   missed: boolean;
   order: number;
 }
 
-const DailyTaskSchema = new Schema<ITask>(
+export interface IMealTask extends IBaseTask {
+  ingredients: string[];
+  calories: number;
+  protein: number;
+  recipeVideoId?: string;
+  recipeUrl?: string;
+  recipeThumbnail?: string;
+  recipeTitle?: string;
+  recipeChannelName?: string;
+}
+
+export interface IExerciseTask extends IBaseTask {
+  sets: number;
+  repsOrDuration: string;
+  restSeconds: number;
+  notes?: string;
+  tutorialVideoId: string;
+tutorialUrl: string;
+tutorialThumbnail: string;
+tutorialTitle: string;
+tutorialChannelName: string;
+}
+
+const baseTaskFields = {
+  title: { type: String, required: true, trim: true },
+  scheduledTime: { type: String },
+  done: { type: Boolean, default: false },
+  missed: { type: Boolean, default: false },
+  order: { type: Number, default: 0 },
+};
+
+const MealTaskSchema = new Schema<IMealTask>(
+  {
+    ...baseTaskFields,
+    ingredients: { type: [String], default: [] },
+    calories: { type: Number, required: true },
+    protein: { type: Number, required: true },
+    recipeVideoId: { type: String },
+    recipeUrl: { type: String },
+    recipeThumbnail: { type: String },
+    recipeTitle: { type: String },
+    recipeChannelName: { type: String },
+  },
+  { _id: true }
+);
+
+const ExerciseTaskSchema = new Schema<IExerciseTask>(
+  {
+    ...baseTaskFields,
+    sets: { type: Number, required: true },
+    repsOrDuration: { type: String, required: true },
+    restSeconds: { type: Number, required: true },
+    notes: { type: String, trim: true },
+    tutorialVideoId: { type: String },
+    tutorialUrl: { type: String },
+    tutorialThumbnail: { type: String },
+    tutorialTitle: { type: String },
+    tutorialChannelName: { type: String },
+  },
+  { _id: true }
+);
+
+// ---------------------------------------------------------
+// 2. NEW: Day-level wrappers (mirrors AI response)
+// ---------------------------------------------------------
+
+// Meal Day — one entry per calendar date in the plan
+export interface IMealDay {
+  _id?: Types.ObjectId;
+  date: string;           // "2026-04-25"
+  dayLabel: string;       // "Saturday"
+  meals: IMealTask[];
+  totalDailyCalories: number;
+  totalDailyProtein: number;
+}
+
+// Exercise Day — one entry per calendar date in the plan
+export interface IExerciseDay {
+  _id?: Types.ObjectId;
+  date: string;           // "2026-04-25"
+  dayLabel: string;       // "Saturday"
+  focus: string;          // "Full Body Strength & Cardio" | "Rest Day"
+  exercises: IExerciseTask[];
+  isRestDay: boolean;
+}
+
+const MealDaySchema = new Schema<IMealDay>(
   {
     date: { type: String, required: true },
-    title: { type: String, required: true, trim: true },
-    scheduledTime: { type: String, required: true },
-    done: { type: Boolean, default: false },
-    missed: { type: Boolean, default: false },
-    order: { type: Number, default: 0 },
+    dayLabel: { type: String, required: true },
+    meals: { type: [MealTaskSchema], default: [] },
+    totalDailyCalories: { type: Number, default: 0 },
+    totalDailyProtein: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  { _id: true }
 );
+
+const ExerciseDaySchema = new Schema<IExerciseDay>(
+  {
+    date: { type: String, required: true },
+    dayLabel: { type: String, required: true },
+    focus: { type: String, default: "" },
+    exercises: { type: [ExerciseTaskSchema], default: [] },
+    isRestDay: { type: Boolean, default: false },
+  },
+  { _id: true }
+);
+
+// ---------------------------------------------------------
+// 3. Goal Interface & Schema (updated)
+// ---------------------------------------------------------
 
 export type GoalType = "gym" | "yoga" | "diet" | "cardio";
 export type PhysiqueTarget =
@@ -33,35 +136,69 @@ export type PhysiqueTarget =
 export type GoalStatus = "active" | "completed" | "abandoned";
 
 export interface IGoal extends Document {
-  userId: Types.ObjectId;
+  // userId: Types.ObjectId;
   title: string;
-  type: GoalType;
+  fitnessGoals: GoalType[];
   physiqueTarget: PhysiqueTarget;
   medicalConditions: string[];
   dietPreference?: string;
   notes?: string;
+  preferredTimes?: {
+    breakfast?: string;
+    lunch?: string;
+    dinner?: string;
+    snack?: string;
+    exercise?: string;
+  };
   durationDays: number;
   startDate: Date;
   endDate: Date;
   progress: number;
   isActive: boolean;
   status: GoalStatus;
-  tasks: ITask[]; 
+
+  // Aggregate Lists
+  groceryList: string[];
+  equipmentNeeded: string[];
+
+  // ✅ NEW: Day-grouped plans (matches AI response structure)
+  mealPlan: IMealDay[];
+  exercisePlan: IExerciseDay[];
 }
 
 const GoalSchema = new Schema<IGoal>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    
     title: { type: String, required: true, trim: true },
-    type: { type: String, enum: ["gym", "yoga", "diet", "cardio"], required: true },
+    fitnessGoals: [
+      {
+        type: String,
+        enum: ["gym", "yoga", "diet", "cardio"],
+        required: true,
+      },
+    ],
     physiqueTarget: {
       type: String,
-      enum: ["Lose Weight", "Build Muscle", "Get Toned", "Increase Flexibility", "Improve Endurance", "General Fitness"],
+      enum: [
+        "Lose Weight",
+        "Build Muscle",
+        "Get Toned",
+        "Increase Flexibility",
+        "Improve Endurance",
+        "General Fitness",
+      ],
       required: true,
     },
     medicalConditions: { type: [String], default: [] },
     dietPreference: { type: String, trim: true },
     notes: { type: String, trim: true },
+    preferredTimes: {
+      breakfast: { type: String, default: "08:00" },
+      lunch: { type: String, default: "13:00" },
+      dinner: { type: String, default: "20:00" },
+      snack: { type: String, default: "16:00" },
+      exercise: { type: String, default: "07:00" },
+    },
     durationDays: { type: Number, required: true, min: 1 },
     startDate: { type: Date, required: true, default: Date.now },
     endDate: { type: Date, required: true },
@@ -70,21 +207,25 @@ const GoalSchema = new Schema<IGoal>(
     status: {
       type: String,
       enum: ["active", "completed", "abandoned"],
-      default: "active"
+      default: "active",
     },
-    tasks: [DailyTaskSchema]
+
+    // Aggregate Lists
+    groceryList: { type: [String], default: [] },
+    equipmentNeeded: { type: [String], default: [] },
+
+    // ✅ Day-grouped subdocuments
+    mealPlan: { type: [MealDaySchema], default: [] },
+    exercisePlan: { type: [ExerciseDaySchema], default: [] },
   },
   { timestamps: true }
 );
-
-GoalSchema.pre("validate", function (next) {
+GoalSchema.pre("validate", function (this: IGoal) {
   if (this.startDate && this.durationDays && !this.endDate) {
     const end = new Date(this.startDate);
     end.setDate(end.getDate() + this.durationDays);
     this.endDate = end;
   }
-//   next();
 });
 
 export const Goal = mongoose.model<IGoal>("Goal", GoalSchema);
-

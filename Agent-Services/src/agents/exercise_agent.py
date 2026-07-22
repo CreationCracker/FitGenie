@@ -1,6 +1,5 @@
-
 import os
-from typing import List, Optional
+from typing import List
 from datetime import datetime, timedelta
 from pydantic import BaseModel, Field
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -8,12 +7,18 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
 
 from state import MasterGraphState
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+from tools.youtube_tutorial_tool import YoutubeTutorialTool
 
 load_dotenv()
 
-# --- PYDANTIC SCHEMAS ---
+# ─── PYDANTIC SCHEMAS ─────────────────────────────────────────────────────────
+
 class Exercise(BaseModel):
     name: str = Field(description="Name of the exercise")
+    scheduled_time: str = Field(description="Scheduled time for this exercise in HH:MM format, e.g. '07:00'")
     sets: int = Field(description="Number of sets (use 1 for cardio or continuous flows)")
     reps_or_duration: str = Field(description="Target reps (e.g., '8-12') or duration (e.g., '30 mins')")
     rest_seconds: int = Field(description="Rest time between sets in seconds")
@@ -29,49 +34,117 @@ class WorkoutPlanResponse(BaseModel):
     plan: List[WorkoutDay] = Field(description="The complete workout plan for the requested duration")
     equipment_needed: List[str] = Field(description="Consolidated master list of all equipment needed.")
 
-# --- AGENT LOGIC ---
+# ─── TOOL SETUP ───────────────────────────────────────────────────────────────
+
+# Instantiate once — reused for every exercise lookup in the agent
+youtube_tool = YoutubeTutorialTool()
+
+TOOLS = [youtube_tool]
+TOOLS_BY_NAME = {t.name: t for t in TOOLS}
+
+# ─── HELPERS ──────────────────────────────────────────────────────────────────
+
+def _collect_unique_exercise_names(plan: List[dict]) -> List[str]:
+    """Returns a deduped list of exercise names across the whole plan."""
+    seen: set[str] = set()
+    unique: list[str] = []
+    for day in plan:
+        for ex in day.get("exercises", []):
+            key = ex["name"].strip().lower()
+            if key not in seen:
+                seen.add(key)
+                unique.append(ex["name"].strip())
+    return unique
+
+
+def _fetch_tutorials_via_tool_calls(exercise_names: List[str]) -> dict[str, dict]:
+    """
+    Dispatches youtube_tutorial_search tool calls for each unique exercise
+    name and returns a lowercase-name → tutorial dict.
+    """
+    tutorials: dict[str, dict] = {}
+
+    for name in exercise_names:
+        print(f"   [Exercise Agent] Tool call → youtube_tutorial_search('{name}')")
+
+        # Dispatch through TOOLS_BY_NAME — standard LangChain tool-call pattern
+        result: dict = TOOLS_BY_NAME["youtube_tutorial_search"]._run(name)
+
+        if "error" in result:
+            print(f"   [Exercise Agent] ⚠ Tutorial not found for '{name}': {result['error']}")
+            tutorials[name.lower()] = {
+                "videoId": "", "url": "", "thumbnail": "", "title": "", "channel": ""
+            }
+        else:
+            tutorials[name.lower()] = result
+
+    return tutorials
+
+
+def _merge_tutorials_into_plan(plan: List[dict], tutorials: dict[str, dict]) -> List[dict]:
+    """
+    Injects the 5 tutorial fields into every exercise dict so they map
+    directly onto the Mongoose ExerciseTaskSchema fields.
+    """
+    for day in plan:
+        enriched: list[dict] = []
+        for ex in day.get("exercises", []):
+            tut = tutorials.get(ex["name"].strip().lower(), {})
+            enriched.append({
+                **ex,
+                "tutorialVideoId":     tut.get("videoId",   ""),
+                "tutorialUrl":         tut.get("url",        ""),
+                "tutorialThumbnail":   tut.get("thumbnail",  ""),
+                "tutorialTitle":       tut.get("title",      ""),
+                "tutorialChannelName": tut.get("channel",    ""),
+            })
+        day["exercises"] = enriched
+
+    return plan
+
+
+# ─── AGENT ────────────────────────────────────────────────────────────────────
+
 def exercise_planning_agent(state: MasterGraphState) -> dict:
     print("   [Exercise Agent] Generating workout plan...")
 
     model = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite-preview", temperature=0.2)
-    
     structured_model = model.with_structured_output(WorkoutPlanResponse)
 
     categories_str = ", ".join(state.get("selected_categories", []))
-    targets_str = ", ".join(state.get("primary_targets", []))
+    targets_str    = ", ".join(state.get("primary_targets", []))
     equipment_list = state.get("available_equipment", [])
-    equipment_str = ", ".join(equipment_list) if equipment_list else "Bodyweight only"
+    equipment_str  = ", ".join(equipment_list) if equipment_list else "Bodyweight only"
 
-    # --- DATE LOGIC ---
-    # Always generate a 7-day week cycle, starting from start_date + 1
+    # ── Date logic ────────────────────────────────────────────────────────────
     duration_days = 7
-    raw_start = state.get("start_date")
-    if raw_start:
-        base_date = datetime.strptime(raw_start, "%Y-%m-%d")
-    else:
-        base_date = datetime.today()
+    raw_start  = state.get("start_date")
+    base_date  = datetime.strptime(raw_start, "%Y-%m-%d") if raw_start else datetime.today()
 
-    date_schedule = []
-    for i in range(duration_days):
-        d = base_date + timedelta(days=i + 1)
-        date_schedule.append({
-            "date": d.strftime("%Y-%m-%d"),
-            "day_label": d.strftime("%A"),
-            "day_number": i + 1
-        })
+    date_schedule = [
+        {
+            "date":       (base_date + timedelta(days=i + 1)).strftime("%Y-%m-%d"),
+            "day_label":  (base_date + timedelta(days=i + 1)).strftime("%A"),
+            "day_number": i + 1,
+        }
+        for i in range(duration_days)
+    ]
 
     schedule_str = "\n".join(
         [f"  Day {s['day_number']}: {s['date']} ({s['day_label']})" for s in date_schedule]
     )
 
+    # ── Privileged instructions ───────────────────────────────────────────────
     user_context_str = state.get("exercise_user_context", "")
-    privileged_instructions = ""
-    if user_context_str:
-        privileged_instructions = f"""
+    privileged_instructions = (
+        f"\n\nIMPORTANT EXERCISE RESTRICTIONS (follow strictly):\n{user_context_str}"
+        if user_context_str else ""
+    )
 
-IMPORTANT EXERCISE RESTRICTIONS (follow strictly):
-{user_context_str}
-"""
+    # ── Preferred exercise time ──────────────────────────────────────────────
+    preferred_times = state.get("preferred_times") or {}
+    exercise_time = preferred_times.get("exercise", "07:00")
+    time_instruction = f"\n- Exercise Schedule: ALL exercises for every training day should have scheduled_time set to \"{exercise_time}\". Each exercise MUST include a \"scheduled_time\" field in HH:MM format."
 
     system_prompt = f"""You are an expert Strength and Conditioning Coach and Fitness AI.
 Your task is to create a highly effective, personalized workout plan.{privileged_instructions}
@@ -81,7 +154,7 @@ Constraints:
 - Primary Goals: {targets_str if targets_str else "General fitness"}
 - Training Frequency: {state.get('days_per_week', 3)} active training days out of 7. Remaining days must be labeled 'Rest Day' with an empty exercises list.
 - Available Equipment: {equipment_str}. Do NOT suggest exercises requiring unlisted equipment.
-- Max Session Duration: 45-60 minutes.
+- Max Session Duration: 45-60 minutes.{time_instruction}
 - Exercise Regularity: Do NOT generate more than 15 unique exercises across the whole plan.
 
 IMPORTANT — use these exact dates and weekday labels in the plan (one entry per day):
@@ -98,14 +171,24 @@ The user reviewed the previous workout plan and requested the following changes:
 "{state['exercise_feedback']}"
 Please generate an updated workout plan incorporating these changes."""
 
+    # ── Step 1: LLM generates the raw plan ───────────────────────────────────
     response: WorkoutPlanResponse = structured_model.invoke([
         SystemMessage(content=system_prompt),
         HumanMessage(content=f"Generate a {duration_days}-day workout plan and equipment list.")
     ])
 
-    return {
-        "generated_workout_plan": [day.model_dump() for day in response.plan],
-        "equipment_needed": response.equipment_needed,
-        "exercise_feedback": None
-    }
+    raw_plan: List[dict] = [day.model_dump() for day in response.plan]
 
+    # ── Step 2: Tool calls — fetch a YouTube tutorial per unique exercise ─────
+    print("   [Exercise Agent] Dispatching tool calls for YouTube tutorials...")
+    unique_names = _collect_unique_exercise_names(raw_plan)
+    tutorials    = _fetch_tutorials_via_tool_calls(unique_names)
+
+    # ── Step 3: Merge tutorial fields into every exercise in the plan ─────────
+    enriched_plan = _merge_tutorials_into_plan(raw_plan, tutorials)
+    print(enriched_plan)
+    return {
+        "generated_workout_plan": enriched_plan,
+        "equipment_needed":       response.equipment_needed,
+        "exercise_feedback":      None,
+    }

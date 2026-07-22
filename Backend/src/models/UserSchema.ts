@@ -15,9 +15,12 @@ export interface IUser extends Document {
   medicalIssues?: string[]; 
   memberSince: Date;
   streak: number;
-  totalTasksDone: number;
+  // totalTasksDone: number;
   currentGoalId?: Types.ObjectId;
   pastGoals: Types.ObjectId[];
+  
+  // Added as a readonly property since it's computed
+  readonly planCount: number; 
 }
 
 const UserSchema = new Schema<IUser>(
@@ -43,11 +46,23 @@ const UserSchema = new Schema<IUser>(
     medicalIssues: [{ type: String, trim: true }], 
     memberSince: { type: Date, default: Date.now },
     streak: { type: Number, default: 0 },
-    totalTasksDone: { type: Number, default: 0 },
+    // totalTasksDone: { type: Number, default: 0 },
     currentGoalId: { type: Schema.Types.ObjectId, ref: "Goal" },
     pastGoals: [{ type: Schema.Types.ObjectId, ref: "Goal" }],
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    // Ensure virtuals are included when converting to JSON/Objects
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
 );
+
+// Define the virtual property
+UserSchema.virtual("planCount").get(function (this: IUser) {
+  const current = this.currentGoalId ? 1 : 0;
+  const past = this.pastGoals ? this.pastGoals.length : 0;
+  return current + past;
+});
 
 export const User = mongoose.model<IUser>("User", UserSchema);

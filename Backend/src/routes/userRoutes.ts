@@ -11,14 +11,16 @@ import {
 } from "../controller/userController.js";
 import { requireAuth } from "../middleware/auth.js"; 
 import { get } from "mongoose";
-
+import { googleSignUp } from "../controller/userController.js";
 const router = Router();
 
 // Public Authentication Routes
 router.post('/login', loginUser);
 router.post('/signup', signupUser);
-router.post('/auth/google', googleLogin);
+router.post('/auth/google/login', googleLogin);
 router.post('/logout', logoutUser);
+router.post('/auth/google/signup', googleSignUp);
+
 
 // Protected Profile Routes
 router.get('/me', requireAuth, getCurrentUser);
